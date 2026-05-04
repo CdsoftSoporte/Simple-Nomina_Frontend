@@ -1,0 +1,13 @@
+﻿.badge-tipo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.panel-periodos {
+    animation: fadeInUp 0.4s ease-out forwards;
+}
+
+::deep .nomina-activa {
+    border-left: 4px solid #0d6efd !important;
+}

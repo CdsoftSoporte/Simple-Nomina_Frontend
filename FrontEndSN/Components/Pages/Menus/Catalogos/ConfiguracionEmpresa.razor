@@ -1,0 +1,240 @@
+﻿@attribute [Authorize]
+@page "/configuracion_empresa"
+@using DevExpress.Blazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Configuración de la empresa</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_configuracion")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Configuración de Empresa</h1>
+                <p class="text-muted m-0">Datos generales, dirección fiscal y configuración SAT/CFDI</p>
+            </div>
+        </div>
+    </header>
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Cargando empleados...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+    <EditForm EditContext="@editContext" Context="formContext">
+        <DataAnnotationsValidator />
+    <DxTabs>
+
+
+     <DxTabPage Text="Datos Generales">
+        @* ── SECCIÓN 1: Datos Generales ── *@
+        <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+            <div class="bg-primary p-3">
+                <h5 class="text-white m-0">
+                    <i class="bi bi-building me-2"></i>Datos Generales
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Razón Social:</label>
+                        <DxTextBox @bind-Text="@Modelo.RazonSocial"
+                                   NullText="Ej. Mi Empresa S.A. de C.V."
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.RazonSocial)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">RFC:</label>
+                        <DxTextBox @bind-Text="@Modelo.Rfc"
+                                   NullText="Ej. MEM920101ABC"
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.Rfc)" />
+                    </div>
+
+                    @* Logo *@
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Logo de la Empresa:</label>
+                        <div class="d-flex align-items-center gap-3">
+                            @if (!string.IsNullOrEmpty(logoBase64))
+                            {
+                                <img src="@logoBase64" alt="Logo"
+                                     style="height:60px; object-fit:contain; border-radius:8px;" />
+                            }
+                            <div>
+                                <InputFile OnChange="@((e) => SubirArchivo(e, "logo"))"
+                                           accept=".png,.jpg,.jpeg"
+                                           class="form-control custom-input" />
+                                @if (!string.IsNullOrEmpty(Modelo.LogoNombre))
+                                {
+                                    <small class="text-muted">
+                                        <i class="bi bi-image me-1"></i>@Modelo.LogoNombre
+                                    </small>
+                                }
+                            </div>
+                        </div>
+                        @if (subiendoLogo)
+                        {
+                            <small class="text-muted"><i class="bi bi-arrow-repeat"></i> Subiendo...</small>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+     </DxTabPage>
+     <DxTabPage Text="Dirección Fiscal">
+        @* ── SECCIÓN 2: Dirección Fiscal ── *@
+        <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+            <div class="bg-primary p-3">
+                <h5 class="text-white m-0">
+                    <i class="bi bi-geo-alt me-2"></i>Dirección Fiscal
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Calle:</label>
+                        <DxTextBox @bind-Text="@Modelo.Calle"
+                                   NullText="Ej. Av. Insurgentes Sur"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">No. Exterior:</label>
+                        <DxTextBox @bind-Text="@Modelo.NumeroExterior"
+                                   NullText="Ej. 123"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">No. Interior:</label>
+                        <DxTextBox @bind-Text="@Modelo.NumeroInterior"
+                                   NullText="Ej. A"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Colonia:</label>
+                        <DxTextBox @bind-Text="@Modelo.Colonia"
+                                   NullText="Ej. Del Valle"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Municipio/Alcaldía:</label>
+                        <DxTextBox @bind-Text="@Modelo.Municipio"
+                                   NullText="Ej. Benito Juárez"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">C.P.:</label>
+                        <DxTextBox @bind-Text="@Modelo.CodigoPostal"
+                                   NullText="Ej. 03100"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Estado:</label>
+                        <DxTextBox @bind-Text="@Modelo.Estado"
+                                   NullText="Ej. CDMX"
+                                   CssClass="custom-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+     </DxTabPage>
+
+     <DxTabPage Text="Datos de Timbrado">
+        @* ── SECCIÓN 3: SAT / CFDI ── *@
+        <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+            <div class="bg-primary p-3">
+                <h5 class="text-white m-0">
+                    <i class="bi bi-shield-lock me-2"></i>Configuración SAT / CFDI
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Certificado CSD (.cer):</label>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(Modelo.CerNombre))
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Cargado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle me-1"></i>Sin archivo</span>
+                            }
+                            <InputFile OnChange="@((e) => SubirArchivo(e, "cer"))"
+                                       accept=".cer"
+                                       class="form-control custom-input" />
+                        </div>
+                        @if (subiendoCer)
+                        {
+                            <small class="text-muted"><i class="bi bi-arrow-repeat"></i> Subiendo...</small>
+                        }
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Llave Privada (.key):</label>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(Modelo.KeyNombre))
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Cargado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle me-1"></i>Sin archivo</span>
+                            }
+                            <InputFile OnChange="@((e) => SubirArchivo(e, "key"))"
+                                       accept=".key"
+                                       class="form-control custom-input" />
+                        </div>
+                        @if (subiendoKey)
+                        {
+                            <small class="text-muted"><i class="bi bi-arrow-repeat"></i> Subiendo...</small>
+                        }
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Contraseña del Certificado:</label>
+                        <DxTextBox @bind-Text="@Modelo.CerPassword"
+                                   Password="true"
+                                   NullText="Contraseña del CSD"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Serie CFDI:</label>
+                        <DxTextBox @bind-Text="@Modelo.SerieCfdi"
+                                   NullText="Ej. A"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Folio Actual:</label>
+                        <DxSpinEdit @bind-Value="@Modelo.FolioActual"
+                                    MinValue="1"
+                                    CssClass="white-border-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+     </DxTabPage>
+    </DxTabs>
+
+        @* ── Botón Guardar ── *@
+        <div class="d-flex justify-content-end mt-2 mb-4">
+            <DxButton Text="Guardar Configuración"
+                      Click="Guardar"
+                      RenderStyle="ButtonRenderStyle.Success"
+                      CssClass="btn-save-all shadow"
+                      IconCssClass="bi bi-check2-circle" />
+        </div>
+        </EditForm>
+    }
+   
+</div>

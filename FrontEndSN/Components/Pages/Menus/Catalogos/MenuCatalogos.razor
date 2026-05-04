@@ -1,0 +1,40 @@
+﻿@attribute [Authorize]
+@page "/menu_catalogos"
+@using Microsoft.AspNetCore.Authorization
+@using System.IdentityModel.Tokens.Jwt
+@using Microsoft.AspNetCore.Components.Authorization
+@using DevExpress.Blazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+<PageTitle>Catálogos del sistema</PageTitle>
+
+<div class="dashboard-container page-header-fade">
+    <header class="dashboard-header catalog-item">
+        <div class="d-flex align-items-center justify-content-center mb-2">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/dashboard")'
+                    title="Regresar al Dashboard">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <h1 class="m-0">Catálogos del Sistema</h1>
+        </div>
+        <p class="text-muted">Administración de tablas base y parámetros</p>
+    </header>
+
+    <div class="dashboard-grid">
+        @foreach (var cat in listaCatalogos)
+        {
+            <div class="card catalog-item" @onclick="() => Nav.NavigateTo(cat.Ruta)">
+                <div class="card-icon" style="color: @cat.Color">
+                    <i class="@cat.Icono"></i>
+                </div>
+                <div class="card-content">
+                    <h3>@cat.Titulo</h3>
+                    <p>@cat.Descripcion</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

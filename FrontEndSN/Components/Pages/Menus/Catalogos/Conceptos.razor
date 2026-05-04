@@ -1,0 +1,232 @@
+﻿@attribute [Authorize]
+@page "/conceptos"
+@using DevExpress.Blazor
+@using FrontEndSN.Clases
+@inherits VentanaBase
+@rendermode InteractiveServer
+<PageTitle>Catálogo de Conceptos</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    @* ── Header ── *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Conceptos</h1>
+                <p class="text-muted m-0">Catálogo de Conceptos de nómina</p>
+                <div class=" d-flex justify-content-end w-100">
+                    <p class="m-0">001-099: Percepciones</p>
+                    <p class="text-muted m-0">101-199: Deducciones</p>
+                    <p class="text-muted m-0">201-299: Unidades</p>
+
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Cargando historial...</p>
+            </div>
+        </div>
+    }else{
+
+        @* ── Grid de Conceptos ── *@
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-0">
+                <DxGrid Data="@ListaConceptos"
+                        PageSize="10"
+                        ShowSearchBox="true"
+                        HighlightRowOnHover="true"
+                        SearchBoxNullText="Buscar conceptos..."
+                        CustomizeElement="Grid_CustomizeElement"
+                        CssClass="custom-grid">
+                    <Columns>
+                        <DxGridDataColumn FieldName="Id" Caption="Clave" Width="80px" />
+                        <DxGridDataColumn FieldName="Descripcion" Caption="Descripción" />
+                        <DxGridDataColumn FieldName="Tipo" Caption="Tipo" Width="120px">
+                            <CellDisplayTemplate>
+                                @ObtenerNombreTipo(((ConceptoModel)context.DataItem).Tipo)
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="Activo" Caption="Estatus" Width="100px">
+                            <CellDisplayTemplate>
+                                @if (((ConceptoModel)context.DataItem).Activo=='S')
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactivo</span>
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridCommandColumn Width="80px" Caption="Acciones" NewButtonVisible="false">
+                            <CellDisplayTemplate>
+                                @if (((ConceptoModel)context.DataItem).EsSistema == 'N')
+                                {
+                                    <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                    @onclick="() => AbrirFormulario((ConceptoModel)context.DataItem)">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridCommandColumn>
+                    </Columns>
+                </DxGrid>
+            </div>
+        </div>
+
+
+
+    }
+</div>
+
+                                @* ── Ventana Modal (DxWindow) ── *@
+<DxWindow Visible="@mostrarModal"
+              VisibleChanged="@((bool visible) => { if (!visible) CerrarFormulario(); })"
+              HeaderText="@(Modelo.Id == 0 ? "Nuevo Concepto" : $"Editar Concepto {Modelo.Id} - {Modelo.Descripcion}")"
+          Width="650px"
+          MaxWidth="95%"
+          Height="auto"
+              ShowCloseButton="true"
+              CloseOnEscape="true"
+              AllowDrag="true"
+              BodyCssClass="p-0"
+              ShowFooter="true"
+          @ref="WindowRef"
+          @bind-PositionX="@VentanaX"
+          @bind-PositionY="@VentanaY">
+        <BodyTemplate>
+        <div class="p-4">
+        <EditForm Model="@Modelo" OnValidSubmit="GuardarConcepto" Context="editContext">
+                <DataAnnotationsValidator />
+                
+                <DxTabs CssClass="custom-tabs mt-2 mb-4">
+                    @* Pestaña 1: Datos Generales *@
+                    <DxTabPage Text="Datos Generales">
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-3">
+                                <label class="form-label">ID</label>
+                                <DxSpinEdit @bind-Value="Modelo.Id" ReadOnly="true" MinValue="1" MaxValue="999" />
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label">Descripción</label>
+                                <DxTextBox @bind-Text="Modelo.Descripcion" />
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo de Concepto</label>
+                                <DxComboBox Data="@catalogoTipos" 
+                                            @bind-Value="Modelo.Tipo"
+                                            ValueFieldName="Clave"
+                                            TextFieldName="Nombre" />
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end pb-2">
+                                <DxCheckBox @bind-Checked="ActivoBool" LabelPosition="LabelPosition.Right">Activo en el Sistema</DxCheckBox>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h6 class="text-muted border-bottom pb-2">Comportamiento del Concepto</h6>
+                                <div class="d-flex flex-wrap gap-4 mt-3">
+                                    <DxCheckBox @bind-Checked="AfectaNetoBool">Afecta al Neto a Pagar</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="IntegraSBCBool">Integra SBC (IMSS)</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="VisibleEnReciboBool">Imprimir en Recibo</DxCheckBox>
+                                </div>
+                            </div>
+                        </div>
+                    </DxTabPage>
+
+                    @* Pestaña 2: Datos de Cálculo y Exenciones *@
+                    <DxTabPage Text="Cálculo e Impuestos">
+                        <div class="row g-3 mt-1">
+                            <div class="col-12">
+                                <h6 class="text-muted border-bottom pb-2">Regla de Importe</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Calcular en base a:</label>
+                                <DxComboBox Data="@catalogoBases"
+                                            @bind-Value="Modelo.BaseCalculo"
+                                            ValueFieldName="Id"
+                                            TextFieldName="Nombre" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Valor o Cantidad:</label>
+                                <DxSpinEdit @bind-Value="Modelo.Valorcalculo" 
+                                            Mask="@(Modelo.BaseCalculo == 1 ? "C2" : "N4")" />
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h6 class="text-muted border-bottom pb-2">Reglas de ISR (Exenciones)</h6>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <DxCheckBox @bind-Checked="GravadoIsrBool">Este concepto es Gravable para ISR</DxCheckBox>
+                            </div>
+                            
+                            @if (Modelo.GravadoIsr=='S')
+                            {
+                                <div class="col-md-6">
+                                    <label class="form-label">Tipo de Exención:</label>
+                                    <DxComboBox Data="@catalogoExenciones"
+                                                @bind-Value="Modelo.ExentoTipo"
+                                                ValueFieldName="Id"
+                                                TextFieldName="Nombre" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite Exento:</label>
+                                    <DxSpinEdit @bind-Value="Modelo.ExentoLimite" 
+                                                Enabled="@(Modelo.ExentoTipo != 0)" 
+                                                Mask="N4" />
+                                </div>
+                            }
+                        </div>
+                    </DxTabPage>
+
+                    @* Pestaña 3: Datos SAT *@
+                    <DxTabPage Text="Timbrado SAT">
+                        <div class="row g-3 mt-1">
+                            <div class="col-12">
+                                <div class="alert alert-info d-flex align-items-center" role="alert">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    Selecciona la clave agrupadora del SAT correspondiente para el timbrado CFDI 4.0.
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Clave SAT Agrupadora</label>
+                                <DxComboBox Data="@catalogoSat"
+                                            @bind-Value="Modelo.IdConceptoSat"
+                                            ValueFieldName="Id"
+                                            TextFieldName="Descripcion"
+                                            SearchMode="ListSearchMode.AutoSearch"
+                                            ListRenderMode="ListRenderMode.Virtual"
+                                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                            </div>
+                        </div>
+                    </DxTabPage>
+                </DxTabs>
+            </EditForm>
+            </div>
+        </BodyTemplate>
+
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Cancelar"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      Click="CerrarFormulario"
+                      CssClass="me-2" />
+            <DxButton Text="Guardar Cambios"
+                      RenderStyle="ButtonRenderStyle.Success"
+                      IconCssClass="bi bi-save"
+                      Click="GuardarConcepto" />
+        </div>
+    </FooterTextTemplate>
+</DxWindow>

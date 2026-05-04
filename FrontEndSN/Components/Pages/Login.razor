@@ -1,0 +1,94 @@
+﻿@page "/login"
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Inicia Sesión</PageTitle>
+
+<div class="login-page">
+
+
+    <div class="login-card-wrapper">
+
+        <div CssClass="login-card p-10">
+
+            <div class="text-center mb-4">
+                <h3 class="fw-bold mb-1">Iniciar Sesión</h3>
+                <p class="text-body-secondary small">
+                    Ingresa tus credenciales
+                </p>
+            </div>
+
+            <DxFormLayout Data="@loginModel" CssClass="form-center">
+
+                <!-- Usuario -->
+                <DxFormLayoutItem ColSpanMd="12">
+                    <Template>
+                        <label class="form-label fw-semibold">Usuario</label>
+                        <DxTextBox @bind-Text="@loginModel.nombre_usuario"
+                                   NullText="Ingrese su usuario"
+                                   CssClass=" custom-input"
+                                   @onkeyup="@manda_inicia_sesion"/>
+                    </Template>
+                </DxFormLayoutItem>
+
+                <!-- Contraseña -->
+                <DxFormLayoutItem ColSpanMd="12">
+                    <Template>
+                        <label class="form-label fw-semibold mt-2">Contraseña</label>
+                        <DxTextBox @bind-Text="@loginModel.contrasena"
+                                   Password="true"
+                                   NullText="Ingrese su contraseña"
+                                   CssClass=" custom-input"
+                                   @onkeyup="@manda_inicia_sesion"/>
+                    </Template>
+                </DxFormLayoutItem>
+
+                <!-- Botón Login -->
+
+                <DxFormLayoutItem ColSpanMd="12">
+                    <Template>
+                        <DxButton Text="Iniciar Sesión"
+                                  RenderStyle="ButtonRenderStyle.Primary"
+                                  CssClass=" mt-4 login-button"
+                                  Click="@inicia_sesion"
+                                  Enabled="@(!isLoading)" />
+                    </Template>
+                </DxFormLayoutItem>
+
+                <!-- Olvidé contraseña -->
+                <DxFormLayoutItem ColSpanMd="12">
+                    <Template>
+                        <div class="text-center mt-3">
+                            <DxButton Text="¿Olvidaste tu contraseña?"
+                                      RenderStyle="ButtonRenderStyle.Link"
+                                      Click="ForgotPassword" />
+                        </div>
+                    </Template>
+                </DxFormLayoutItem>
+
+                <!-- Error -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <div class="text-danger text-center small mt-3 fade-in">
+                                @errorMessage
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                }
+
+            </DxFormLayout>
+
+        </div>
+
+    </div>
+
+</div>
+
+

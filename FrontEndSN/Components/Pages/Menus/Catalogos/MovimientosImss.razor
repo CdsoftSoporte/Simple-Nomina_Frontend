@@ -1,0 +1,238 @@
+﻿@attribute [Authorize]
+@page "/movimientos_imss"
+@using DevExpress.Blazor
+@using FrontEndSN.Clases
+@inherits VentanaBase
+@rendermode InteractiveServer
+<PageTitle>Movimientos Afiliatorios</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    @* ── Header ── *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Movimientos Afiliatorios</h1>
+                <p class="text-muted m-0">Historial y captura de movimientos para Imss/Infonavit</p>
+            </div>
+        </div>
+    </header>
+
+ 
+    @* ── Selector de Empleado ── *@
+    <div class="card shadow-sm border-0 p-3 fade-in-all form-section-spacer">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <label class="form-label fw-bold small text-primary">Empleado:</label>
+                <DxComboBox Data="@ListaEmpleados"
+                            TextFieldName="NombreCompleto"
+                            ValueFieldName="Id"
+                            Value="@IdEmpleadoSeleccionado"
+                            ValueChanged="@((int id) => OnEmpleadoChanged(id))"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            NullText="Busque un empleado para ver su historial..."
+                            CssClass="w-100" />
+            </div>
+            
+        </div>
+    </div>
+
+    @* ── Selector de Empleado ── *@
+    <div class="card shadow-sm border-0 p-3 fade-in-all form-section-spacer">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <label class="form-label fw-bold small text-primary">Registro Patronal:</label>
+                <DxComboBox Data="@PatronesList"
+                            TextFieldName="razon_social"
+                            ValueFieldName="id"
+                            Value="@IdPatronSeleccionado"
+                            ValueChanged="@((int id) => OnPatronChanged(id))"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            NullText="Escoja un registro patronal..."
+                            CssClass="w-100" />
+            </div>
+
+        </div>
+    </div>
+    @* ── Grid de Historial ── *@
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Cargando historial...</p>
+            </div>
+        </div>
+    }
+    else if (IdEmpleadoSeleccionado > 0 && IdPatronSeleccionado > 0)
+    {
+        <div class="col-md-6 text-end pt-6">
+            @if (IdEmpleadoSeleccionado > 0 && IdPatronSeleccionado > 0)
+            {
+                <DxButton Text="Nuevo Movimiento"
+                          Click="@(() => AbrirFormulario())"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          IconCssClass="bi bi-file-earmark-plus-fill"
+                          CssClass="shadow-sm" />
+            }
+        </div>
+        <div class="card shadow-sm border-0 p-3 fade-in-all w-100">
+            <DxGrid Data="@Historial"
+                    PageSize="10"
+                    TextAlignment="GridTextAlignment.Center"
+                    HighlightRowOnHover="true"
+                    CssClass="w-100">
+                <Columns>
+                    <DxGridDataColumn FieldName="fecha" Caption="Fecha" DisplayFormat="dd/MM/yyyy" Width="120px" />
+                    <DxGridDataColumn FieldName="tipo_movimiento" Caption="Tipo" Width="100px">
+                        <CellDisplayTemplate>
+                            @{
+                                var m = (MovimientoAfiliatorioModel)context.DataItem;
+                                <span class="badge @(m.tipo_movimiento == 'A' ? "bg-success" : m.tipo_movimiento == 'B' ? "bg-danger" : "bg-info")">
+                                    @GetTipoMovimientoTexto(m.tipo_movimiento)
+                                </span>
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                    <DxGridDataColumn FieldName="salario_diario" Caption="Salario Diario" DisplayFormat="C2" CaptionAlignment="GridTextAlignment.Center" TextAlignment="GridTextAlignment.Center" />
+                    <DxGridDataColumn FieldName="salario_integrado" Caption="Salario Integrado" DisplayFormat="C2" CaptionAlignment="GridTextAlignment.Center" TextAlignment="GridTextAlignment.Center" />
+                    <DxGridDataColumn FieldName="factor_integracion" Caption="Factor de Integración" DisplayFormat="N6" CaptionAlignment="GridTextAlignment.Center" TextAlignment="GridTextAlignment.Center" />
+                    <DxGridDataColumn Caption="Acciones" Width="100px" CaptionAlignment="GridTextAlignment.Center" TextAlignment="GridTextAlignment.Center">
+                        <CellDisplayTemplate>
+
+                            <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                    @onclick="@(() => AbrirFormulario((MovimientoAfiliatorioModel)context.DataItem))">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm border-0 btn-icon-custom" @onclick="() => ConfirmarEliminar((MovimientoAfiliatorioModel)context.DataItem)">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                </Columns>
+                <EmptyDataAreaTemplate>
+                    <div class="empty-grid-container">
+                        <div class="empty-icon-wrapper">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h4>Sin historial</h4>
+                        <p>No hay movimientos registrados para este empleado.</p>
+                    </div>
+                </EmptyDataAreaTemplate>
+            </DxGrid>
+        </div>
+    }
+</div>
+
+@* ── Formulario Modal ── *@
+<DxWindow @bind-Visible="@MostrarFormulario"
+          HeaderText="@(Modelo.id == 0 ? "Nuevo Movimiento Afiliatorio" : "Editar Movimiento")"
+          Width="600px"
+          Modal="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          ShowFooter="true"
+          HeaderCssClass="bg-primary text-white" 
+          @bind-PositionX="@VentanaX"
+          @bind-PositionY="@VentanaY"
+          BodyCssClass="p-0">
+    <BodyTextTemplate Context="windowContext">
+        <div class="p-4 w-100">
+            <EditForm EditContext="@editContext" Context="formContext">
+                <DataAnnotationsValidator />
+                <DxTabs>
+                    <DxTabPage Text="Datos del IMSS">
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">Registro Patronal:</label>
+                                <DxComboBox Data="@PatronesList" TextFieldName="razon_social" ValueFieldName="id" @bind-Value="@Modelo.id_patron" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Fecha del Movimiento:</label>
+                                <DxDateEdit @bind-Date="@Modelo.fecha" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Tipo de Movimiento:</label>
+                                <DxComboBox Data="@tiposOpciones" TextFieldName="Texto" ValueFieldName="Valor" @bind-Value="@Modelo.tipo_movimiento" />
+                            </div>
+                            @* --- SALARIO DIARIO --- *@
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Salario Diario:</label>
+                                <DxMaskedInput T="decimal"
+                                               Value="@Modelo.salario_diario"
+                                               ValueExpression="@(() => Modelo.salario_diario)"
+                                               ValueChanged="@((decimal v) => OnSdChanged(v))"
+                                               Mask="C2">
+                                </DxMaskedInput>
+                            </div>
+
+                            @* --- VACACIONES --- *@
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Dias de Vacaciones:</label>
+                                <DxMaskedInput T="byte"
+                                               Value="@Modelo.dias_vacaciones"
+                                               ValueExpression="@(() => Modelo.dias_vacaciones)"
+                                               ValueChanged="@((byte v) => OnVacChanged(v))"
+                                               Mask="00">
+                                </DxMaskedInput>
+                            </div>
+
+                            @* --- AGUINALDO --- *@
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Dias de Aguinaldo:</label>
+                                <DxMaskedInput T="byte"
+                                               Value="@Modelo.dias_aguinaldo"
+                                               ValueExpression="@(() => Modelo.dias_aguinaldo)"
+                                               ValueChanged="@((byte v) => OnAguinaldoChanged(v))"
+                                               Mask="00">
+                                </DxMaskedInput>
+                            </div>
+
+                            @* --- PRIMA VACACIONAL --- *@
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Prima Vacacional % :</label>
+                                <DxMaskedInput T="decimal"
+                                               Value="@Modelo.prima_vacacional"
+                                               ValueExpression="@(() => Modelo.prima_vacacional)"
+                                               ValueChanged="@((decimal v) => OnPrimaChanged(v))"
+                                               Mask="P2">
+                                </DxMaskedInput>
+                            </div>
+                        </div>
+                    </DxTabPage>
+                    <DxTabPage Text="Infonavit">
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">Número de Crédito:</label>
+                                <DxTextBox @bind-Text="@Modelo.cuenta_infonavit" MaxLength="10" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Tipo de Descuento:</label>
+                                <DxComboBox Data="@infonavitOpciones" TextFieldName="Texto" ValueFieldName="Valor" @bind-Value="@Modelo.tipo_descuento_infonavit" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Importe / Valor:</label>
+                                <DxSpinEdit @bind-Value="@Modelo.importe_descuento_infonavit" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Fecha Inicio Descuento:</label>
+                                <DxDateEdit @bind-Date="@Modelo.fecha_inicio_descuento_infonavit" />
+                            </div>
+                        </div>
+                    </DxTabPage>
+                </DxTabs>
+            </EditForm>
+        </div>
+    </BodyTextTemplate>
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="CerrarFormulario" CssClass="me-2" />
+            <DxButton Text="Guardar Movimiento" RenderStyle="ButtonRenderStyle.Success" IconCssClass="bi bi-save" Click="Guardar" />
+        </div>
+    </FooterTextTemplate>
+</DxWindow>

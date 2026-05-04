@@ -1,0 +1,382 @@
+﻿@attribute [Authorize]
+@page "/nominas_y_periodos"
+@using DevExpress.Blazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Nóminas y Periodos</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    @* ── Header ── *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_calculo_nomina")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Catálogo de Nóminas</h1>
+                <p class="text-muted m-0">Configuración y periodos ordinarios de nómina</p>
+            </div>
+        </div>
+        <DxButton Text="Nueva Nómina"
+                  Click="() => MostrarModal()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" />
+    </header>
+
+    @* ── Selector de Nómina ── *@
+    <div class="card shadow-sm border-0 p-4 mb-4 fade-in-all">
+        <div class="row align-items-end g-3">
+            <div class="col-md-5">
+                <label class="form-label fw-bold text-primary">
+                    <i class="bi bi-journals me-1"></i> Seleccionar Nómina:
+                </label>
+                <DxComboBox Data="@Lista"
+                            TextFieldName="descripcion"
+                            Value="@NominaSeleccionada"
+                            ValueChanged="@((NominaModel n) => OnNominaChanged(n))"
+                            NullText="Seleccione una nómina..."
+                            CssClass="white-border-input" />
+            </div>
+            @if (NominaSeleccionada != null)
+            {
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Tipo:</label>
+                    <div class="badge-tipo p-2 rounded text-center w-50
+                            @(NominaSeleccionada.tipo == 'M' ? "bg-primary" :
+                                                   NominaSeleccionada.tipo == 'Q' ? "bg-success" :
+                                                   NominaSeleccionada.tipo == 'S' ? "bg-warning text-dark" : "bg-info") text-white">
+                    @ObtenerDescripcionTipo(NominaSeleccionada.tipo)
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Ejercicio:</label>
+                <div class="p-2 rounded text-center bg-light fw-bold">
+                    @NominaSeleccionada.ejercicio
+                </div>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <DxButton Text="Editar"
+                          Click="() => MostrarModal(NominaSeleccionada)"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          IconCssClass="bi bi-pencil-square"
+                          CssClass="w-80" />
+            </div>
+                        }
+        </div>
+    </div>
+
+@* ── Panel de Periodos ── *@
+@if (NominaSeleccionada != null)
+{
+        <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+            <div class="bg-primary p-3 d-flex justify-content-between align-items-center">
+                <h5 class="text-white m-0">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    Periodos de: @NominaSeleccionada.descripcion
+                </h5>
+                @if (!tienePeriodos)
+                {
+                    <DxButton Text="Generar Periodos"
+                              Click="MostrarPanelGeneracion"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              IconCssClass="bi bi-calendar-plus"
+                              Size="ButtonSize.Small" />
+                }
+            </div>
+
+            @* Panel generación de periodos *@
+            @if (mostrarGeneracion && !tienePeriodos)
+            {
+                <div class="p-4 border-bottom bg-light">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha Inicio:</label>
+                            <DxDateEdit @bind-Date="@fechaInicioGeneracion"
+                                        CssClass="white-border-input" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha Fin:</label>
+                            <DxDateEdit @bind-Date="@fechaFinGeneracion"
+                                        CssClass="white-border-input" />
+                        </div>
+                        <div class="col-md-4 d-flex gap-2">
+                            <DxButton Text="Generar"
+                                      Click="GenerarPeriodos"
+                                      RenderStyle="ButtonRenderStyle.Success"
+                                      IconCssClass="bi bi-check2-circle"
+                                      CssClass="w-100" />
+                            <DxButton Text="Cancelar"
+                                      Click="() => mostrarGeneracion = false"
+                                      RenderStyle="ButtonRenderStyle.Secondary"
+                                      CssClass="w-100" />
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @* Grid de periodos *@
+            <div class="p-3">
+                @if (generandoPeriodos)
+                {
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Generando periodos...</p>
+                    </div>
+                }
+                else if (tienePeriodos)
+                {
+                    @* Botón agregar periodo manual *@
+                   
+                    <div class="d-flex justify-content-end mb-2">
+                            <DxButton Text="Agregar Periodo Manual"
+                                      Click="() => MostrarModalPeriodo()"
+                                      RenderStyle="ButtonRenderStyle.Primary"
+                                      IconCssClass="bi bi-plus-circle-fill"
+                                      Size="ButtonSize.Small" />
+                    </div>
+                    
+                    <DxGrid Data="@Periodos"
+                            PageSize="10"
+                            EditMode="GridEditMode.EditRow"
+                            KeyFieldName="id"
+                            EditModelSaving="OnPeriodoSaving"
+                            TextAlignment="GridTextAlignment.Center"
+                            HighlightRowOnHover="true"
+                            CssClass="w-100">
+                        <Columns>
+                            <DxGridDataColumn FieldName="numero" Caption="#" Width="60px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="desde" Caption="Desde" Width="110px" DisplayFormat="dd/MM/yyyy" />
+                            <DxGridDataColumn FieldName="hasta" Caption="Hasta" Width="110px" DisplayFormat="dd/MM/yyyy" />
+                            <DxGridDataColumn FieldName="fecha_pago" Caption="Fecha Pago" Width="110px" DisplayFormat="dd/MM/yyyy">
+                                <CellEditTemplate>
+                                    @{
+                                        var p = (PeriodoModel)context.EditModel;
+                                    }
+                                    <DxDateEdit @bind-Date="@p.fecha_pago_dt"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn FieldName="naturaleza" Caption="Naturaleza" Width="110px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var p = (PeriodoModel)context.EditModel;
+                                    }
+                                    <DxComboBox Data="@naturalezaOpciones"
+                                                @bind-Value="@p.naturaleza"
+                                                TextFieldName="Texto"
+                                                ValueFieldName="Valor"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn FieldName="descripcion" Caption="Descripción">
+                                <CellEditTemplate>
+                                    @{
+                                        var p = (PeriodoModel)context.EditModel;
+                                    }
+                                    <DxTextBox @bind-Text="@p.descripcion"
+                                               CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn FieldName="ultima_nomina_mes" Caption="Últ. Mes" Width="80px" TextAlignment="GridTextAlignment.Center">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var p = (PeriodoModel)context.DataItem;
+                                    }
+                                    @if (p.ultima_nomina_mes == 'S')
+                                    {
+                                        <span class="badge bg-info">Sí</span>
+                                    }
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridCommandColumn Width="100px" Caption="Acciones" NewButtonVisible="false">
+                                <CellDisplayTemplate>
+                                    <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                            title="Editar"
+                                            @onclick="@(() => context.Grid.StartEditRowAsync(context.VisibleIndex))">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </CellDisplayTemplate>
+                                <CellEditTemplate>
+                                    <button class="btn btn-success btn-sm border-0 btn-icon-custom me-1"
+                                            title="Guardar"
+                                            @onclick="@(() => context.Grid.SaveChangesAsync())">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm border-0 btn-icon-custom"
+                                            title="Cancelar"
+                                            @onclick="@(() => context.Grid.CancelEditAsync())">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </CellEditTemplate>
+                            </DxGridCommandColumn>
+                        </Columns>
+                        <EmptyDataAreaTemplate>
+                            <div class="empty-grid-container">
+                                <div class="empty-icon-wrapper">
+                                    <i class="bi bi-calendar3"></i>
+                                </div>
+                                <h4>Sin periodos generados</h4>
+                            </div>
+                        </EmptyDataAreaTemplate>
+                    </DxGrid>
+                }
+                else
+                {
+                    <div class="empty-grid-container">
+                        <div class="empty-icon-wrapper">
+                            <i class="bi bi-calendar-plus"></i>
+                        </div>
+                        <h4>Sin periodos generados</h4>
+                        <p class="text-muted">Presiona "Generar Periodos" para comenzar.</p>
+                    </div>
+                }
+            </div>
+        </div>
+}
+</div>
+
+@* ── Modal Agregar/Editar Nóminas ── *@
+<DxWindow @bind-Visible="@isModalVisible"
+          HeaderText="@(Modelo.id == 0 ? "Nueva Nómina" : "Editar Nómina")"
+          Width="550px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          Modal="true">
+    <BodyTextTemplate>
+        <EditForm EditContext="@editContext" Context="formContext"style="width:90%!important;">
+            <DataAnnotationsValidator />
+            <div class="p-2 w-100">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Descripción:</label>
+                        <DxTextBox @bind-Text="@Modelo.descripcion"
+                                   NullText="Ej. Nómina Quincenal Planta"
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.descripcion)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Tipo de Nómina:</label>
+                        <DxComboBox Data="@tiposNomina"
+                                    @bind-Value="@Modelo.tipo"
+                                    TextFieldName="Texto"
+                                    ValueFieldName="Valor"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.tipo)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Ejercicio:</label>
+                        <DxSpinEdit @bind-Value="@ejercicioInt"
+                                    MinValue="2020"
+                                    MaxValue="2099"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.ejercicio)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Registro Patronal:</label>
+                        <DxComboBox Data="@PatronesList"
+                                    @bind-Value="@Modelo.id_patron"
+                                    TextFieldName="razon_social"
+                                    ValueFieldName="id"
+                                    NullText="Seleccione..."
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.id_patron)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Estatus:</label>
+                        <DxComboBox Data="@estatusOpciones"
+                                    @bind-Value="@Modelo.activo"
+                                    TextFieldName="Texto"
+                                    ValueFieldName="Valor"
+                                    CssClass="white-border-input" />
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3"style="margin-top:10px !important;">
+                    <DxButton Text="Cancelar"
+                              Click="() => isModalVisible = false"
+                              RenderStyle="ButtonRenderStyle.Secondary" />
+                    <DxButton Text="Guardar"
+                              Click="Guardar"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              IconCssClass="bi bi-check2-circle" />
+                </div>
+            </div>
+        </EditForm>
+    </BodyTextTemplate>
+</DxWindow>
+
+
+@* Modal Periodo Manual *@
+<DxWindow @bind-Visible="@isModalPeriodoVisible"
+          HeaderText="Agregar Periodo Manual"
+          Width="550px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          Modal="true">
+    <BodyTextTemplate>
+        <EditForm EditContext="@editContextPeriodo" Context="periodoContext" style="width:90%!important;">
+            <DataAnnotationsValidator />
+            <div class="p-2 w-100">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Número:</label>
+                        <DxSpinEdit @bind-Value="@PeriodoModelo.numero"
+                                    MinValue="1"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => PeriodoModelo.numero)" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Naturaleza:</label>
+                        <DxComboBox Data="@naturalezaOpciones"
+                                    @bind-Value="@PeriodoModelo.naturaleza"
+                                    TextFieldName="Texto"
+                                    ValueFieldName="Valor"
+                                    CssClass="white-border-input" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha Desde:</label>
+                        <DxDateEdit @bind-Date="@PeriodoModelo.desde_dt"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => PeriodoModelo.desde_dt)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha Hasta:</label>
+                        <DxDateEdit @bind-Date="@PeriodoModelo.hasta_dt"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => PeriodoModelo.hasta_dt)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha de Pago:</label>
+                        <DxDateEdit @bind-Date="@PeriodoModelo.fecha_pago_dt"
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => PeriodoModelo.fecha_pago_dt)" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Descripción:</label>
+                        <DxTextBox @bind-Text="@PeriodoModelo.descripcion"
+                                   NullText="Ej. Periodo especial aguinaldo 2026"
+                                   CssClass="custom-input" />
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-8">
+                    <DxButton Text="Cancelar"
+                              Click="() => isModalPeriodoVisible = false"
+                              RenderStyle="ButtonRenderStyle.Secondary" />
+                    <DxButton Text="Guardar"
+                              Click="GuardarPeriodoManual"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              IconCssClass="bi bi-check2-circle" />
+                </div>
+            </div>
+        </EditForm>
+    </BodyTextTemplate>
+</DxWindow>

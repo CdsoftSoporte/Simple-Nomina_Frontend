@@ -1,0 +1,219 @@
+﻿@inherits LayoutComponentBase
+@using FrontEndSN.Services
+@inject NavigationManager NavigationManager
+@inject DxThemesService ThemesService
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@using  System.Text.Json;
+@using  System.Text.Json.Serialization;
+@using Microsoft.AspNetCore.Components.Authorization
+@using static FrontEndSN.Components.Pages.Menus.Catalogos.ConfiguracionEmpresa
+@implements IDisposable
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="page">
+    <Drawer DrawerHeader="drawerHeader" DrawerFooter="drawerFooter">
+       
+        <DrawerBody>
+            
+            <div class="w-100">
+                <NavMenu></NavMenu>
+            </div>
+         
+        </DrawerBody>
+       
+        <DrawerTarget>
+           @*  <AuthorizeView>
+            <div class="nav-buttons-container">
+                <NavLink href="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
+                    <DxButton RenderStyle="@(ThemesService.IsActiveThemeDark ? ButtonRenderStyle.Light : ButtonRenderStyle.Dark)" RenderStyleMode="@ButtonRenderStyleMode.Text" CssClass="menu-button" IconCssClass="icon icon-menu"></DxButton>
+                </NavLink>
+            </div>
+            </AuthorizeView> *@
+            <div class="p-4">
+                @Body
+            </div>
+            <FooterApp></FooterApp>
+        </DrawerTarget>
+    </Drawer>
+
+</div>
+
+@code {
+    private string LogoUrl { get; set; } = "images/simplenominalogo.png"; // Default por si falla o no hay
+    [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
+    public bool ToggledSidebar { get; set; }
+    private bool TieneEmpresaSeleccionada => !string.IsNullOrEmpty(Modelo?.RazonSocial) && Modelo?.RazonSocial != "Simplenomina™ By CDSoft";
+
+
+    private ConfiguracionEmpresaModel Modelo = new();
+    private string? logoBase64;
+    private RenderFragment drawerHeader => @<div class="navigation-drawer-header">
+
+        <div class="logo-wrapper">
+            <img class="logo-custom"
+                 src="@(string.IsNullOrEmpty(logoBase64) ? LogoUrl : logoBase64)"
+                 alt="Logo Empresa" /> 
+        </div>
+
+        @if (!string.IsNullOrEmpty(Modelo?.RazonSocial))
+        {
+        <div class="company-name-container mt-2">
+            <span class="company-name-text">@Modelo.RazonSocial</span>
+        </div>
+        }
+        else
+        {
+
+         <div class="company-name-container mt-2">
+        <span class="company-name-text">Simplenomina™ By CDSoft</span>
+         </div>
+        }
+        
+        <NavLink href="@UrlGenerator.GetUrl(new Uri(NavigationManager.Uri).LocalPath, !ToggledSidebar)">
+            
+        </NavLink>
+    </div>;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        Nav.LocationChanged += OnLocationChanged;
+        await CargarLogoEmpresa();
+    
+
+    }
+
+    // Este evento se dispara cada vez que cambias de página
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            await CargarLogoEmpresa();
+            StateHasChanged();
+        });
+    }
+    private async Task CargarLogoEmpresa()
+    {
+        var rutaActual = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
+
+        if (rutaActual.Contains("login") || rutaActual.Contains("selecciona_empresa"))
+        {
+            logoBase64 = null;
+            return;
+        }
+        try
+        {
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                Nav.NavigateTo("/login");
+                return;
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "api/ConfiguracionEmpresa/Obtener");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<ConfiguracionEmpresaModel>>(
+                                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                Modelo = resultado.Data;
+
+                if (Modelo.LogoArchivo != null)
+                {
+                    var ext = Path.GetExtension(Modelo.LogoNombre ?? ".png").ToLower();
+                    var mime = ext == ".png" ? "image/png" : "image/jpeg";
+                    logoBase64 = $"data:{mime};base64,{Convert.ToBase64String(Modelo.LogoArchivo)}";
+                }
+
+
+            }
+            else
+            {
+                var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+
+                string mensajePrincipal = errorData?.Message ?? "Error inesperado";
+                string detalleTecnico = errorData?.Details ?? "No hay detalles adicionales.";
+                await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la información: " + mensajePrincipal + " " + detalleTecnico);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("notifier.error", "Error al cargar configuración: " + ex.Message);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        await InvokeAsync(async () =>
+        {
+            await CargarLogoEmpresa();
+            StateHasChanged(); // Forzamos el redibujado
+        });
+    }
+
+    public void Dispose()
+    {
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        Nav.LocationChanged -= OnLocationChanged; 
+    }
+
+    private RenderFragment drawerFooter => @<div class="d-flex flex-column align-items-end w-100 p-2 border-top">
+        <AuthorizeView>
+        <Authorized>
+        @if (TieneEmpresaSeleccionada)
+        {
+
+            <NavLink href="#" class="button-link text-decoration-none">
+                <DxButton Text="Dashboard"
+                          RenderStyleMode="@ButtonRenderStyleMode.Text"
+                          CssClass="footer-button w-100 text-start"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          IconCssClass="bi bi-collection-fill me-2"></DxButton>
+            </NavLink>
+
+        <NavLink href="/selecciona_empresa" class="button-link text-decoration-none mb-1">
+            <DxButton Text="Cambiar empresa"
+                      RenderStyleMode="@ButtonRenderStyleMode.Text"
+                      CssClass="footer-button w-100 text-start"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                          IconCssClass="oi oi-hard-drive me-2"></DxButton>
+        </NavLink>
+
+        <NavLink href="#" class="button-link text-decoration-none">
+            <DxButton Text="Salir"
+                      RenderStyleMode="@ButtonRenderStyleMode.Text"
+                      CssClass="footer-button w-100 text-start text-danger"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      Click="cerrar_sesion"
+                      IconCssClass="bi bi-box-arrow-right me-2"></DxButton>
+        </NavLink>
+        }
+        </Authorized>
+    </AuthorizeView>
+    </div>
+    ;
+
+    private async void cerrar_sesion()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "Token");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "EmpresasTemporales");
+        Modelo = new();
+        NavigationManager.NavigateTo("/login",forceLoad:true);
+        StateHasChanged();
+    }
+
+}

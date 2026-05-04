@@ -1,0 +1,188 @@
+﻿@attribute [Authorize]
+@page "/registros_patronales"
+@using DevExpress.Blazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Registros Patronales</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar a Catálogos">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Registros Patronales</h1>
+                <p class="text-muted m-0">Configuración de registros patronales</p>
+            </div>
+        </div>
+        <DxButton Text="Nuevo Registro"
+                  Click="() => MostrarModal()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" />
+    </header>
+
+    <div class="card shadow-sm border-0 p-3 fade-in-all w-100">
+        <DxGrid Data="@Lista"
+                PageSize="10"
+                ShowFilterRow="false"
+                TextAlignment="GridTextAlignment.Center"
+                HighlightRowOnHover="true"
+                CssClass="w-100">
+            <Columns>
+                <DxGridDataColumn FieldName="Rfc" Caption="RFC" Width="140px" />
+                <DxGridDataColumn FieldName="RazonSocial" Caption="Razón Social" />
+                <DxGridDataColumn FieldName="Descripcion" Caption="Descripción">
+                    <CellDisplayTemplate>
+                        <span style="white-space: normal; word-break: break-word;">@context.Value</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="Cp" Caption="C.P." Width="80px" />
+                <DxGridDataColumn FieldName="SerieTimbrado" Caption="Serie" Width="70px" />
+                <DxGridDataColumn FieldName="Activo" Caption="Activo" Width="70px" />
+                <DxGridDataColumn Caption="Acciones" Width="80px" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (RegistroPatronalModel)context.DataItem;
+                        }
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                    @onclick="() => MostrarModal(item)">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </div>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <EmptyDataAreaTemplate>
+                <div class="empty-grid-container">
+                    <div class="empty-icon-wrapper">
+                        <i class="bi bi-building-fill-gear"></i>
+                    </div>
+                    <h4>Sin registros patronales</h4>
+                    <p>Registre al menos un registro patronal.</p>
+                </div>
+            </EmptyDataAreaTemplate>
+        </DxGrid>
+    </div>
+</div>
+
+@* Modal *@
+<DxWindow @bind-Visible="@isModalVisible"
+          HeaderText="@(Modelo.Id == 0 ? "Nuevo Registro Patronal" : "Editar Registro Patronal")"
+          Width="450px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          Modal="true">
+    <BodyTextTemplate>
+        <EditForm EditContext="@editContext" Context="formContext"style="width:90%;">
+            <DataAnnotationsValidator />
+            <div class="p-2 w-100">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">RFC:</label>
+                        <DxTextBox @bind-Text="@Modelo.Rfc"
+                                   NullText="Ej. MEM920101ABC"
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.Rfc)" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Razón Social:</label>
+                        <DxTextBox @bind-Text="@Modelo.RazonSocial"
+                                   NullText="Ej. Mi Empresa S.A. de C.V."
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.RazonSocial)" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Descripción:</label>
+                        <DxTextBox @bind-Text="@Modelo.Descripcion"
+                                   NullText="Ej. Registro principal"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">País:</label>
+                        <DxComboBox Data="@PaisesList"
+                                    @bind-Value="@Modelo.IdPais"
+                                    TextFieldName="Descripcion"
+                                    ValueFieldName="Id"
+                                    NullText="Seleccione..."
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.IdPais)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Entidad Federativa:</label>
+                        <DxComboBox Data="@EntidadesList"
+                                    @bind-Value="@Modelo.IdEntidadFederativa"
+                                    TextFieldName="Descripcion"
+                                    ValueFieldName="Id"
+                                    NullText="Seleccione..."
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.IdEntidadFederativa)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Riesgo de Puesto:</label>
+                        <DxComboBox Data="@RiesgosList"
+                                    @bind-Value="@Modelo.IdRiesgo"
+                                    TextFieldName="Descripcion"
+                                    ValueFieldName="Id"
+                                    NullText="Seleccione..."
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.IdRiesgo)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Origen de Recursos:</label>
+                        <DxComboBox Data="@OrigenRecursosList"
+                                    @bind-Value="@Modelo.IdOrigenRecursos"
+                                    TextFieldName="Descripcion"
+                                    ValueFieldName="Id"
+                                    NullText="Seleccione..."
+                                    CssClass="white-border-input" />
+                        <ValidationMessage For="@(() => Modelo.IdOrigenRecursos)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">C.P.:</label>
+                        <DxTextBox @bind-Text="@Modelo.Cp"
+                                   NullText="Ej. 81285"
+                                   CssClass="custom-input" />
+                        <ValidationMessage For="@(() => Modelo.Cp)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Serie Timbrado:</label>
+                        <DxTextBox @bind-Text="@Modelo.SerieTimbrado"
+                                   NullText="Ej. A"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Clave Declarante AF02:</label>
+                        <DxTextBox @bind-Text="@Modelo.ClaveDeclaranteAf02"
+                                   NullText="Opcional"
+                                   CssClass="custom-input" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Estatus:</label>
+                        <DxComboBox Data="@estatusOpciones"
+                                    @bind-Value="@Modelo.Activo"
+                                    TextFieldName="Texto"
+                                    ValueFieldName="Valor"
+                                    CssClass="white-border-input" />
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3" style="margin-top:10px !important;">
+                    <DxButton Text="Cancelar"
+                              Click="() => isModalVisible = false"
+                              RenderStyle="ButtonRenderStyle.Secondary" />
+                    <DxButton Text="Guardar Cambios"
+                              Click="Guardar"
+                              RenderStyle="ButtonRenderStyle.Primary" />
+                </div>
+            </div>
+        </EditForm>
+    </BodyTextTemplate>
+</DxWindow>

@@ -1,0 +1,324 @@
+@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+.button-link {
+    text-decoration: unset;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+.title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 0.625rem;
+}
+
+    .title.title-secondary {
+        padding-top: 0.313rem;
+        padding-bottom: 0;
+        color: var(--bs-secondary-color, var(--DS-color-content-neutral-default-rest));
+    }
+
+.title-header-text {
+    font-size: 2.5rem;
+    line-height: 3rem;
+    font-weight: 600;
+    letter-spacing: 0rem;
+    padding: 0.3125rem 0;
+}
+
+.title-content-text {
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    letter-spacing: 0rem;
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.block-content {
+    width: 31.25rem;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-width: 100%;
+}
+
+.icon {
+    width: var(--icon-width);
+    height: var(--icon-height);
+    background-color: currentcolor;
+    mask-position: center center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--icon-mask-image);
+    mask-image: var(--icon-mask-image);
+}
+
+
+
+
+/* Quita el borde de enfoque automático en títulos y contenedores */
+h1:focus, h2:focus, h3:focus, div:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.dashboard-container:focus {
+    outline: none !important;
+}
+
+/*iconos para botones de acciones en grids*/
+
+.btn-icon-custom {
+    border-radius: 20% !important;
+    background-color: rgba(255,255,255,0.0);
+    border: 1px solid transparent;
+    padding-top: 1px;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease, border-color 0.7s ease;
+}
+
+    .btn-icon-custom:hover {
+        cursor: pointer;
+        border: 1px solid #0d6efd;
+    }
+
+/* Contenedor del área vacía (EMPTYDATAAREATEMPLATE) */
+.empty-grid-container {
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.empty-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(13, 110, 253, 0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+}
+
+    .empty-icon-wrapper i {
+        font-size: 2rem;
+        color: #0d6efd;
+    }
+
+.empty-grid-container h4 {
+    color: #FFFFFE;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.empty-grid-container p {
+    color: #FFFFFE;
+    max-width: 300px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+
+/*BOTON VOLVER*/
+.btn-back-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 20%;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #6c757d; /* Color gris suave por defecto */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 0;
+}
+
+    .btn-back-custom:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd; /* Cambia al azul primario */
+        transform: translateX(-3px); /* Pequeño brinco a la izquierda */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-color: #0d6efd;
+    }
+
+    .btn-back-custom i {
+        line-height: 0;
+        font-size: 1.5rem;
+    }
+/*BOTON VOLVER*/
+
+/*CONTENEDOR GENERAL Y ANIMACION DE FADE AL INICIO*/
+
+.dashboard-container {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fade-in-all {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/*CONTENEDOR GENERAL Y ANIMACION DE FADE AL INICIO*/
+
+/* Ajustes para inputs dentro de modales */
+.custom-input {
+    border-radius: 8px !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    padding: 0.3rem !important;
+}
+
+    .custom-input:focus-within {
+        border-color: var(--bs-body-bg) !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
+
+.btn-sm i {
+    font-size: 1.3rem;
+    color: #0F6CBD;
+    border-radius: 100%;
+}
+
+.bg-primary {
+    background-color: var(--bs-body-bg) !important;
+}
+::deep .w-100.dxbl-grid table {
+    width: 100% !important;
+}
+.spinner-custom {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #e0e7ff;
+    border-top-color: #0d6efd;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.form-section-spacer {
+    margin-bottom: 1.2rem; 
+}
+
+.logo-wrapper {
+    width: 100%;
+    height: 150px; /* Reducimos un poco para dar espacio al texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contenedor del nombre para asegurar alineación */
+.company-name-container {
+    width: 100%;
+    text-align: center;
+    padding: 0 10px;
+    /* Evita que nombres muy largos rompan el diseño */
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+/* Estilo del texto del nombre */
+.company-name-text {
+    font-size: 0.85rem;
+    
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    word-break: break-word;
+    text-overflow: clip;
+    font-family: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+}
+
+
+.logo-custom {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border-radius:10%;
+    /* Mantiene la proporción y centra la imagen si es muy delgada o muy ancha */
+    object-fit: contain;
+    /* Efecto sutil para que no se vea "pegado" al fondo */
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+.navigation-drawer-header {
+    /* Esto fuerza que el contenido se apile verticalmente si las clases de Bootstrap fallan por jerarquía */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100%;
+}

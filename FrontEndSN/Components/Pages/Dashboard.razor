@@ -1,0 +1,30 @@
+﻿@attribute [Authorize]
+@page "/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@using System.IdentityModel.Tokens.Jwt
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+<PageTitle>Dashboard</PageTitle>
+
+<div class="dashboard-container fade-in-all">
+    <header class="dashboard-header">
+        <h1>Bienvenido, @(string.IsNullOrEmpty(UserName) ? "Cargando..." : UserName)</h1>
+        <p>¿Qué acción deseas realizar?</p>
+    </header>
+
+    <div class="dashboard-grid">
+        @foreach (var modulo in modulos)
+        {
+            <div class="card fade-in-all" @onclick="() => Navegar(modulo.Ruta)">
+                <div class="card-icon">
+                    <i class="@modulo.Icono"></i>
+                </div>
+                <div class="card-content">
+                    <h3>@modulo.Titulo</h3>
+                    <p>@modulo.Descripcion</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

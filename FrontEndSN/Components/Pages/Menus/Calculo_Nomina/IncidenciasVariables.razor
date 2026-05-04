@@ -1,0 +1,210 @@
+﻿@attribute [Authorize]
+@page "/incidencias_variables"
+@using DevExpress.Blazor
+@using FrontEndSN.Clases
+@inherits VentanaBase
+@rendermode InteractiveServer
+
+<PageTitle>Incidencias Variables</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    @* ── Header ── *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_calculo_nomina")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Incidencias Variables</h1>
+                <p class="text-muted m-0">Captura de Incidencias Variables en periodos de nómina</p>
+            </div>
+        </div>
+    </header>
+
+    @* ── Filtros de Búsqueda ── *@
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label fw-bold">Nómina:</label>
+                    <DxComboBox Data="@ListaNominas"
+                                TextFieldName="DescripcionCompleta"
+                                ValueFieldName="Id"
+                                Value="@IdNominaSeleccionada"
+                                ValueChanged="(int newValue) => OnNominaChanged(newValue)"
+                                NullText="Seleccione una nómina..."
+                                SearchMode="ListSearchMode.AutoSearch"
+                                CssClass="w-100" />
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label fw-bold">Periodo:</label>
+                    <DxComboBox Data="@ListaPeriodos"
+                                TextFieldName="DescripcionCompleta"
+                                ValueFieldName="id"
+                                Value="IdPeriodoSeleccionado"
+                                NullText="Seleccione un periodo..."
+                                SearchMode="ListSearchMode.AutoSearch"
+                                ValueChanged="(int newValue) => OnPeriodoChanged(newValue)"
+                                Enabled="@(IdNominaSeleccionada > 0)"
+                                CssClass="w-100" />
+                </div>
+                <div class="col-md-4">
+                    <DxButton Text="Buscar Incidencias"
+                              Click="@(() => BuscarIncidencias())"
+                              RenderStyle="ButtonRenderStyle.Primary"
+                              Enabled="@(IdPeriodoSeleccionado>0)"
+                              IconCssClass="bi bi-search"
+                              CssClass="shadow-sm" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Área de Trabajo y Grid ── *@
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Listado de incidencias en el periodo seleccionado</h5>
+            <DxButton Text="Nueva Incidencia"
+                      Click="() => AbrirFormulario()"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      Enabled="@(IdPeriodoSeleccionado>0)"
+                      IconCssClass="bi bi-plus-circle-fill"
+                      CssClass="shadow-sm" />
+        </div>
+        <div class="card-body">
+            
+
+            <DxGrid Data="@ListaIncidencias"
+                    ShowFilterRow="false"
+                    ShowSearchBox="true"
+                    SearchBoxNullText="Buscar incidencia..."
+                    CustomizeElement="Grid_CustomizeElement"
+                    PageSize="7"
+                    HighlightRowOnHover="true"
+                    CssClass="w-100">
+                <Columns>
+                    <DxGridDataColumn FieldName="NombreEmpleado" Caption="Empleado" />
+                    <DxGridDataColumn FieldName="NombreConcepto" Caption="Concepto"    />
+                    <DxGridDataColumn FieldName="Importe" Caption="Importe" DisplayFormat="c2" Width="120px" TextAlignment="GridTextAlignment.Right" />
+                    <DxGridDataColumn FieldName="Fecha" Caption="Fecha" DisplayFormat="dd/MM/yyyy" Width="120px" />                  
+
+                    <DxGridDataColumn Caption="Acciones" Width="89px" TextAlignment="GridTextAlignment.Center">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (IncidenciaVariableModel)context.DataItem;
+                            }
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                        title="Editar"
+                                        @onclick="@(() => AbrirFormulario(item))">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm border-0 btn-icon-custom" @onclick="() => ConfirmarEliminar(item)">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+
+                </Columns>
+                <EmptyDataAreaTemplate>
+                    <div class="empty-grid-container">
+                        <div class="empty-icon-wrapper">
+                            <i class="bi bi-clipboard-minus-fill"></i>
+                        </div>
+                        <h4>Sin incidencias variables registradas</h4>
+                    </div>
+                </EmptyDataAreaTemplate>
+            </DxGrid>
+        </div>
+    </div>
+
+</div>
+
+@* ── Ventana Modal para Agregar/Editar Incidencia ── *@
+<DxWindow @bind-Visible="@MostrarModal"
+          HeaderText="@(Modelo.Id == 0 ? "Nueva incidencia" : $"Editando incidencia")"
+          Width="600px"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          AllowResize="false"
+          ShowFooter="true">
+          
+    <BodyTextTemplate>
+        <div class="p-4 w-100">
+        <EditForm EditContext="@ContextoFormulario" OnValidSubmit="AgregarIncidencia" Context="formContext">
+            <DataAnnotationsValidator />
+
+           
+                @* Empleado *@
+                <div class="col-12">
+                    <label class="form-label fw-bold">Empleado <span class="text-danger">*</span></label>
+                    <DxComboBox Data="@ListaEmpleados"
+                                TextFieldName="NombreCompleto"
+                                ValueFieldName="Id"
+                                @bind-Value="Modelo.IdEmpleado"
+                                NullText="Seleccione un empleado..."
+                                SearchMode="ListSearchMode.AutoSearch"
+                                CssClass="w-100" />
+                    <ValidationMessage For="@(() => Modelo.IdEmpleado)" class="text-danger small" />
+                </div>
+
+                @* Concepto *@
+                <div class="col-12">
+                    <label class="form-label fw-bold">Concepto <span class="text-danger">*</span></label>
+                    <DxComboBox Data="@ListaConceptos"
+                                TextFieldName="DescripcionConcepto"
+                                ValueFieldName="Id"
+                                Value="@Modelo.IdConcepto"
+                                ValueChanged="(int v) => OnConceptoCambiado(v)"
+                                ValueExpression="@(() => Modelo.IdConcepto)"
+                                NullText="Seleccione un concepto..."
+                                SearchMode="ListSearchMode.AutoSearch"
+                                CssClass="w-100" />
+                    <ValidationMessage For="@(() => Modelo.IdConcepto)" class="text-danger small" />
+                </div>
+
+                @* Fecha *@
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Fecha <span class="text-danger">*</span></label>
+                    <DxDateEdit @bind-Date="Modelo.Fecha"
+                                CssClass="w-100" />
+                    <ValidationMessage For="@(() => Modelo.Fecha)" class="text-danger small" />
+                </div>
+
+                @* Importe *@
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Importe/Cantidad <span class="text-danger">*</span></label>
+                    <DxSpinEdit @bind-Value="Modelo.Importe"
+                                DisplayFormat="N2"
+                                MinValue="0.01m"
+                                CssClass="w-100" />
+                    <ValidationMessage For="@(() => Modelo.Importe)" class="text-danger small" />
+                </div>
+
+                @* Checkbox Dinámico *@
+                @if (MostrarGoceSueldo)
+                {
+                    <div class="col-12 mt-3 fade-in-all">
+                        <div class="form-check form-switch">
+                            <DxCheckBox @bind-Checked="Modelo.ConGoceSueldoBool"
+                                        CssClass="fw-bold text-primary">¿Con goce de sueldo?</DxCheckBox>
+                        </div>
+                    </div>
+                }
+     
+        </EditForm>
+        </div>
+    </BodyTextTemplate>
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="CerrarFormulario" CssClass="me-2" />
+            <DxButton Text="Guardar Movimiento" RenderStyle="ButtonRenderStyle.Success" IconCssClass="bi bi-save" Click="AgregarIncidencia" />
+        </div>
+    </FooterTextTemplate>
+</DxWindow>

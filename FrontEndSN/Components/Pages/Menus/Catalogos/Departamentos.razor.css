@@ -1,0 +1,117 @@
+﻿
+.btn-back-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 20%;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #6c757d; /* Color gris suave por defecto */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 0;
+}
+
+.btn-back-custom:hover {
+    background-color: #f8f9fa;
+    color: #0d6efd; /* Cambia al azul primario */
+    transform: translateX(-3px); /* Pequeño brinco a la izquierda */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-color: #0d6efd;
+}
+
+.btn-back-custom i {
+    line-height: 0;
+    font-size: 1.5rem;
+}
+/*BOTON VOLVER*/
+
+
+.dashboard-container {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fade-in-all {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ajustes para inputs dentro de modales */
+.custom-input {
+    border-radius: 8px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    padding: 0.3rem !important;
+}
+
+    .custom-input:focus-within {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
+
+.btn-sm i {
+    font-size: 1.3rem;
+    color: #0F6CBD;
+    border-radius: 100%;
+}
+
+.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+
+/* Contenedor del área vacía (EMPTYDATAAREATEMPLATE) */
+.empty-grid-container {
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.empty-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(13, 110, 253, 0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+}
+
+    .empty-icon-wrapper i {
+        font-size: 2rem;
+        color: #0d6efd;
+    }
+
+.empty-grid-container h4 {
+    color: #FFFFFE;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.empty-grid-container p {
+    color: #FFFFFE;
+    max-width: 300px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+/* Contenedor del área vacía (EMPTYDATAAREATEMPLATE) */

@@ -1,0 +1,130 @@
+﻿@attribute [Authorize]
+@page "/departamentos"
+@using DevExpress.Blazor
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Catálogo de Departamentos</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+        <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-back-custom me-3"
+                        @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                        title="Regresar a Catálogos">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="text-start">
+                    <h1 class="m-0">Departamentos</h1>
+                    <p class="text-muted m-0"></p>
+                </div>
+            </div>
+
+        </header>
+        <DxButton Text="Nuevo Departamento"
+                  Click="() => MostrarModal()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" />
+
+    @* Tabla de Datos *@
+    <div class="card shadow-sm border-0 p-3 fade-in-all" style="width:792px!important;">
+        <DxGrid Data="@Deptos"
+                PageSize="10"
+                ShowFilterRow="false"
+                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                HighlightRowOnHover="true"
+                TextAlignment="GridTextAlignment.Center">
+            <Columns>
+                <DxGridDataColumn FieldName="Nombre" Caption="Nombre" Width="300px" />
+                <DxGridDataColumn FieldName="Descripcion" Caption="Descripción" Width="350px" />
+                <DxGridDataColumn FieldName="Activo" Caption="Activo" Width="60px" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn Caption="Acciones" Width="80px" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (Departamento)context.DataItem;
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => MostrarModal(item)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </div>
+                        }
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+         
+            </Columns>
+            <EmptyDataAreaTemplate>
+                <div class="empty-grid-container">
+                    <div class="empty-icon-wrapper">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                    <h4>Sin departamentos registrados</h4>
+                    <p>Registre al menos un departamento.</p>
+                </div>
+            </EmptyDataAreaTemplate>
+        </DxGrid>
+    </div>
+</div>
+
+@* Modal para Agregar/Editar *@
+<DxWindow 
+    @bind-Visible="@isModalVisible"
+          HeaderText="@(DeptoModel.Id == 0 ? "Nuevo Registro" : "Editar Departamento")"
+          Width="550px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          FooterText=""
+          Modal="true">
+    <BodyTextTemplate>
+       
+    <EditForm EditContext="@editContext" Context="formContext" style="width:100%">
+        <DataAnnotationsValidator />
+        <div class="p-1 w-100">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nombre:</label>
+                <DxTextBox @bind-Text="@DeptoModel.Nombre"
+                           NullText="Ej. Sistemas"
+                           CssClass="custom-input" />
+                <ValidationMessage For="@(() => DeptoModel.Nombre)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Descripción:</label>
+                <DxTextBox @bind-Text="@DeptoModel.Descripcion"
+                           NullText="Ej. Tareas de programación..."
+                           CssClass="custom-input" />
+                <ValidationMessage For="@(() => DeptoModel.Descripcion)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Estatus:</label>
+                <DxComboBox Data="@estatusOpciones"
+                            @bind-Value="@DeptoModel.Activo"
+                            TextFieldName="Texto"
+                            ValueFieldName="Valor"
+                            CssClass="white-border-input" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Grupo de prestaciones:</label>
+                <DxComboBox Data="@GruposList"
+                            @bind-Value="@DeptoModel.IdGrupoPrestacion"
+                            TextFieldName="Descripcion"
+                            ValueFieldName="Id"
+                            CssClass="white-border-input" />
+                <ValidationMessage For="@(() => DeptoModel.IdGrupoPrestacion)" />
+            </div>
+            <div style="margin-top:10px">
+                <DxButton Text="Cancelar" 
+                          Click="() => isModalVisible = false" 
+                          RenderStyle="ButtonRenderStyle.Secondary" />
+                <DxButton Text="Guardar Cambios" 
+                          Click="Guardar" 
+                          RenderStyle="ButtonRenderStyle.Primary" />
+            </div>
+        </div>
+    </EditForm>
+    </BodyTextTemplate>
+</DxWindow>

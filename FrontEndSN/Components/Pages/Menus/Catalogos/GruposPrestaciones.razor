@@ -1,0 +1,203 @@
+﻿@attribute [Authorize]
+@page "/GruposPrestaciones"
+@using DevExpress.Blazor
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Grupos de Prestaciones</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    @* --- Header Estilo Dashboard --- *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar a Catálogos">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Grupos de Prestaciones</h1>
+                <p class="text-muted m-0">Configuración de aguinaldo, vacaciones y factores</p>
+            </div>
+        </div>
+        <DxButton Text="Nuevo Grupo"
+                  Click="() => PrepararNuevoGrupo()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" />
+    </header>
+
+    @* --- Selector de Grupo (Diseño Card) --- *@
+    <div class="card shadow-sm border-0 p-4 mb-4 fade-in-all">
+        <div class="row align-items-end">
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">Seleccionar Grupo Existente:</label>
+                <DxComboBox Data="@listaGrupos"
+                            TextFieldName="Descripcion"
+                            Value="@grupoSeleccionado"
+                            ValueChanged="@((PrestacionLey g) => OnGrupoChanged(g))"
+                            NullText="Seleccione para editar..."
+                            CssClass="white-border-input" />
+            </div>
+            @if (grupoModel != null)
+            {
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Estatus:</label>
+                    <DxComboBox Data="@estatusOpciones"
+                                @bind-Value="@grupoModel.Activo"
+                                TextFieldName="Texto"
+                                ValueFieldName="Valor"
+                                CssClass="white-border-input" />
+                </div>
+            }
+        </div>
+   
+
+    @if (grupoModel != null)
+    {
+        @* --- Formulario de Detalle --- *@
+        <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden">
+                <div class="bg-primary p-3 d-flex justify-content-between align-items-center" style="background-color=rgba(0,0,0,0.0)!important;">
+                <h5 class="text-white m-0">
+                    <i class="bi bi-clipboard-check me-2"></i>
+                    @(grupoModel.Id == 0 ? "Nueva Configuración" : "Detalles de: " + grupoModel.Descripcion)
+                </h5>
+                <DxButton Text="Agregar Renglón"
+                          Click="AgregarRenglon"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          IconCssClass="bi bi-plus-lg"
+                          Size="ButtonSize.Small" />
+            </div>
+            <br />
+            <div class="p-3">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nombre del Grupo:</label>
+                    <DxTextBox @bind-Text="@grupoModel.Descripcion"
+                               CssClass=" white-border-input"
+                               NullText="Ej. Prestaciones Superiores Depto. Ejecutivo 2026" />
+                </div>
+
+   
+                <br />
+        
+
+                <DxGrid Data="@grupoModel.Detalles"
+                        PageSize="5"
+                        EditMode="GridEditMode.EditRow"
+                        KeyFieldName="Id"
+                        EditModelSaving="OnEditModelSaving"
+                            HighlightRowOnHover="true"
+                        CssClass="custom-grid-style white-border-input">
+                    <Columns>
+                            <DxGridDataColumn FieldName="Anos" Caption="Años" Width="90px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var m = (PrestacionLeyDetalle)context.EditModel;
+                                    }
+                                    <DxSpinEdit Value="@m.Anos"
+                                                ValueExpression="@(() => m.Anos)"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+                       
+                            <DxGridDataColumn FieldName="DiasVacaciones" Caption="Vacaciones" Width="120px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var m = (PrestacionLeyDetalle)context.EditModel;
+                                    }
+                                    <DxSpinEdit Value="@m.DiasVacaciones"
+                                                ValueExpression="@(() => m.DiasVacaciones)"
+                                                ValueChanged="@((int v) => RecalcularFactor(m, "DiasVacaciones", v))"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="DiasVacaciones" Caption="Aguinaldo" Width="120px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var m = (PrestacionLeyDetalle)context.EditModel;
+                                    }
+                                    <DxSpinEdit Value="@m.DiasAguinaldo"
+                                                ValueExpression="@(() => m.DiasAguinaldo)"
+                                                ValueChanged="@((int v) => RecalcularFactor(m, "DiasAguinaldo", v))"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="PrimaVacacional" Caption="Prima %" Width="100px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var m = (PrestacionLeyDetalle)context.EditModel;
+                                    }
+                                    <DxSpinEdit Value="@m.PrimaVacacional"
+                                                ValueExpression="@(() => m.PrimaVacacional)"
+                                                ValueChanged="@((decimal v) => RecalcularFactor(m, "PrimaVacacional", v))"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+
+
+                            <DxGridDataColumn FieldName="FactorIntegracion" Caption="Factor Int." DisplayFormat="N6" Width="130px" TextAlignment="GridTextAlignment.Center">
+                                <CellEditTemplate>
+                                    @{
+                                        var m = (PrestacionLeyDetalle)context.EditModel;
+                                    }
+                                    <DxSpinEdit @bind-Value="m.FactorIntegracion"
+                                                ReadOnly="true"
+                                                CssClass="white-border-input" />
+                                </CellEditTemplate>
+                            </DxGridDataColumn>
+
+
+                            <DxGridCommandColumn Width="100px" Caption="Acciones" NewButtonVisible="false">
+                                <CellDisplayTemplate>
+                                    <button class="btn btn-sm border-0 btn-icon-custom me-1" style="color:white;"
+                                            title="Editar"
+                                            @onclick="@(() => context.Grid.StartEditRowAsync(context.VisibleIndex))">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn  btn-sm border-0 btn-icon-custom"style="color:white;"
+                                            title="Eliminar"
+                                            @onclick="@(() => grupoModel.Detalles.Remove((PrestacionLeyDetalle)context.DataItem))">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                </CellDisplayTemplate>
+                                <CellEditTemplate>
+                                    <button class="btn btn-sm  border-0 btn-icon-custom me-1" style="color:white;"
+                                            title="Guardar"
+                                            @onclick="@(() => context.Grid.SaveChangesAsync())">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button class="btn btn-sm  border-0 btn-icon-custom" style="color:white;"
+                                            title="Cancelar"
+                                            @onclick="@(() => context.Grid.CancelEditAsync())">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </CellEditTemplate>
+                            </DxGridCommandColumn>
+                    </Columns>
+                    <EmptyDataAreaTemplate>
+                        <div class="empty-grid-container">
+                            <div class="empty-icon-wrapper">
+                                <i class="bi bi-question-circle"></i>
+                            </div>
+                            <h4>Sin Detalle para mostrar</h4>
+                        
+                        </div>
+                    </EmptyDataAreaTemplate>
+                </DxGrid>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <DxButton Text="Guardar Configuración"
+                              Click="GuardarTodo"
+                              RenderStyle="ButtonRenderStyle.Success"
+                              CssClass="btn-save-all shadow"
+                              IconCssClass="bi bi-check2-circle" />
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+</div>

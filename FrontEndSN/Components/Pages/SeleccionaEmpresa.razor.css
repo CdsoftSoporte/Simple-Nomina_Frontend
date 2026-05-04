@@ -1,0 +1,150 @@
+﻿
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --transition-speed: 1.2s;
+    --cubic-bezier: cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Contenedor principal */
+.dashboard-container {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+    .dashboard-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+/* Grid Responsivo para Dashboard y Catálogos */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* --- TARJETA BASE (CARD) --- */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    flex-direction: row; /* Icono a la izquierda */
+    align-items: center;
+    cursor: pointer;
+    border: 5px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    /* Transición lenta y fluida */
+    transition: transform var(--transition-speed) var(--cubic-bezier), box-shadow var(--transition-speed) ease, border-color 0.6s ease;
+}
+
+    /* Usamos .catalog-item:hover para ganar prioridad sobre la animación de entrada */
+    .catalog-item:hover, .card:hover {
+        transform: translateY(-8px) !important;
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        border-color: var(--blazor-load-border-color, #052c65);
+    }
+
+/* Elementos internos de la Tarjeta */
+.card-icon {
+    font-size: 2.5rem;
+    margin-right: 1.5rem;
+    min-width: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.card-content p {
+    margin: 3px 0 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* --- ANIMACIONES DE ENTRADA (STAGGERED) --- */
+.page-header-fade {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.catalog-item {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+    /* Retrasos secuenciales para que aparezcan una por una */
+    .catalog-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .catalog-item:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .catalog-item:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .catalog-item:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .catalog-item:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+    .catalog-item:nth-child(6) {
+        animation-delay: 0.35s;
+    }
+
+    .catalog-item:nth-child(7) {
+        animation-delay: 0.4s;
+    }
+
+    .catalog-item:nth-child(8) {
+        animation-delay: 0.45s;
+    }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- AJUSTES PARA MÓVILES --- */
+@media (max-width: 600px) {
+    .dashboard-container {
+        padding: 1.5rem;
+    }
+
+    .card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .card-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}

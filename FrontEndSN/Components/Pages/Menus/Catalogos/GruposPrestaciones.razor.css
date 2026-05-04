@@ -1,0 +1,88 @@
+﻿
+
+/* INPUTS CUSTOM (Tu estilo exacto) */
+::deep .custom-input {
+    border-radius: 8px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    padding: 0.3rem !important;
+}
+
+    ::deep .custom-input:focus-within {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
+
+/* ESTILO PARA EL GRID */
+::deep .custom-grid-style {
+    border: none !important;
+    border-radius: 8px;
+    max-width:671px;
+}
+
+.btn-icon-custom {
+    border-radius: 20% !important;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+    .btn-icon-custom:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #0d6efd;
+    }
+
+.btn-save-all {
+    padding: 0.8rem 2.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+/* Clase para los combos y textos */
+.white-border-input {
+    border: 1px solid white !important;
+    background-color: white !important;
+    border-radius: 8px;
+}
+
+/* Clase para el contenedor del Grid */
+.white-border-grid {
+    border: 1px solid white !important;
+    background-color: white !important;
+}
+
+/* Quitar las líneas internas del Grid para que se vea todo blanco */
+::deep .dx-grid-table td,
+::deep .dx-grid-table th {
+    border: 1px solid white !important;
+}
+
+/* Efecto focus para no perder la guía visual al escribir */
+.white-border-input:focus-within {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+
+
+.btn-success.btn-icon-custom:hover {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+    color: #0d6efd !important;
+}
+
+.btn-secondary.btn-icon-custom:hover {
+    background-color: rgba(108, 117, 125, 0.15) !important;
+    color: #0d6efd !important;
+}
+
+.btn-icon-custom {
+    font-size:20px;
+    border-radius: 20% !important;
+    background-color: rgba(0,214,239,0.0);
+    border: 1px solid transparent;
+    padding-top: 1px;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease, border-color 0.7s ease;
+}
+
+    .btn-icon-custom:hover {
+        cursor: pointer;
+        border: 1px solid #0d6efd;
+    }

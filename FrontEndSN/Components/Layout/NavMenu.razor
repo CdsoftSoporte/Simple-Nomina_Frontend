@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized>
+        @{
+            // Extraemos el claim EmpresaIdActiva que viene en tu JSON
+            var claimEmpresa = context.User.FindFirst("EmpresaIdActiva")?.Value;
+
+            // Verificamos que tenga un valor válido (distinto de nulo o vacío)
+            var tieneEmpresaActiva = !string.IsNullOrEmpty(claimEmpresa) && claimEmpresa != "0";
+        }
+
+        @if (tieneEmpresaActiva)
+        {           
+            <div class="p-0">
+                <h4 style="text-align:center; background-color:#0D4399">Acciones rápidas</h4>
+            </div>
+            ﻿
+            <div id="sidebar">
+
+                <DxMenu Orientation="@Orientation.Vertical" CssClass="menu">            
+                    <Items>
+                        <DxMenuItem NavigateUrl="/calculo_nomina" Text="Cálculo de Nómina" CssClass="menu-item icono" IconCssClass="bi bi-calculator-fill"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/timbrado_nomina" Text="Timbrado de Nómina" CssClass="menu-item" IconCssClass="oi oi-globe"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/incidencias_variables" Text="Incidencias Variables" CssClass="menu-item" IconCssClass="bi bi-clipboard-minus-fill"></DxMenuItem>
+                        <DxMenuItem NavigateUrl="/movimientos_imss" Text="Movimientos Afiliatorios" CssClass="menu-item" IconCssClass="bi bi-journal-bookmark-fill"></DxMenuItem>
+                    </Items>
+                </DxMenu>
+
+            </div>
+}
+        else
+        {
+            @* --- VISTA PLACEHOLDER (Cuando está en selecciona_empresa) --- *@
+            <div class="p-4 text-center mt-5 opacity-75">
+                <!--  <i class="bi bi-building-dash d-block mb-2" style="font-size: 2.5rem; color: #0D4D99;"></i>-->
+                <p class="text-muted small fw-bold">Por favor, seleccione una empresa para comenzar.</p>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>

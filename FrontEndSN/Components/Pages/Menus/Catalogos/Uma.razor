@@ -1,0 +1,103 @@
+﻿@attribute [Authorize]
+@page "/Uma"
+@using DevExpress.Blazor
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+<PageTitle>Unidad de Medida y Actualización</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar a Catálogos">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Unidad de Medida y Actualizacion</h1>
+                <p class="text-muted m-0">Histórico de importes vigentes</p>
+            </div>
+        </div>
+        <DxButton Text="Nueva UMA"
+                  Click="() => MostrarModal()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" />
+    </header>
+
+    @* Tabla de Datos *@
+    <div class="card shadow-sm border-0 p-3 fade-in-all" style="width:500px!important;">
+        <DxGrid Data="@uma"
+                PageSize="10"
+                ShowFilterRow="false"
+                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                HighlightRowOnHover="true"
+                TextAlignment="GridTextAlignment.Center">
+            <Columns>
+                <DxGridDataColumn FieldName="a_partir_de" Caption="Fecha de Vigencia (A Partir De)" DisplayFormat="dd/MMM/yyyy" Width="220px" />
+                <DxGridDataColumn FieldName="importe" Caption="Importe Diario" DisplayFormat="C2" Width="150px" />
+
+                <DxGridDataColumn Caption="Acciones" Width="128px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (Umas)context.DataItem;
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => MostrarModal(item)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm border-0 btn-icon-custom" @onclick="() => ConfirmarEliminar(item)">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        }
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <EmptyDataAreaTemplate>
+                <div class="empty-grid-container">
+                    <div class="empty-icon-wrapper">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h4>Sin UMAS registradas</h4>
+                    <p>Registre al menos una UMA.</p>
+                </div>
+            </EmptyDataAreaTemplate>
+        </DxGrid>
+    </div>
+</div>
+
+@* Modal para Agregar/Editar *@
+<DxWindow @bind-Visible="@isModalVisible"
+          HeaderText="@(editModel.id == 0 ? "Nuevo Registro" : "Editar Uma")"
+          Width="350px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          FooterText=""
+          Modal="true">
+    <BodyTextTemplate>
+        <div class="p-2">
+            <div class="mb-3">
+                <label class="form-label fw-bold">A partir de:</label>
+                <DxDateEdit @bind-Date="@editModel.a_partir_de"
+                            Format="dd/MM/yyyy"
+                            CssClass="custom-input" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Importe:</label>
+                <DxSpinEdit @bind-Value="@editModel.importe"
+                            DisplayFormat="C2"
+                            Mask="@NumericMask.Currency"
+                            CssClass="custom-input" />
+            </div>
+            <div style="margin-top:10px">
+                <DxButton Text="Cancelar" Click="() => isModalVisible = false" RenderStyle="ButtonRenderStyle.Secondary" />
+                <DxButton Text="Guardar Cambios" Click="Guardar" RenderStyle="ButtonRenderStyle.Primary" />
+            </div>
+        </div>
+    </BodyTextTemplate>
+</DxWindow>

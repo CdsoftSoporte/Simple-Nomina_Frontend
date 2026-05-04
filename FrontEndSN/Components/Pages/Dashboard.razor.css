@@ -1,0 +1,92 @@
+﻿.dashboard-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Grid Responsivo */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Tarjeta Estilizada */
+.card {
+    background-color: var(--bs-body-bg, #ffffff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+}
+
+    .card:hover {
+        transform: translateY(-5px)!important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1)!important;
+        /* El borde cambia según el color primario del tema */
+        border-color: var(--blazor-load-border-color, #052c65);
+    }
+
+/* Iconos dinámicos */
+.card-icon {
+    font-size: 2rem;
+    margin-right: 1.5rem;
+    color: var(--primary, #007bff); /* Color dinámico del tema */
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--bs-emphasis-color, #333);
+}
+
+.card-content p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--bs-secondary-color, #666);
+}
+
+/* Ajustes para móviles */
+@media (max-width: 600px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+.fade-in-all {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

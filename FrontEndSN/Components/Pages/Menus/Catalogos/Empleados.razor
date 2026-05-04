@@ -1,0 +1,334 @@
+﻿@attribute [Authorize]
+@page "/empleados"
+@using DevExpress.Blazor
+@using FrontEndSN.Clases
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<PageTitle>Catálogo de Empleados</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    @* ── Header ── *@
+    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-back-custom me-3"
+                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
+                    title="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="text-start">
+                <h1 class="m-0">Empleados</h1>
+                <p class="text-muted m-0">Gestión del personal de la empresa</p>
+            </div>
+        </div>
+        <DxButton Text="Nuevo Empleado"
+                  Click="@(() => AbrirFormulario())"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-person-plus-fill"
+                  CssClass="shadow-sm" />
+    </header>
+
+    @* ── Grid ── *@
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Cargando empleados...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 p-3 fade-in-all w-100">
+            <DxGrid Data="@Lista"
+                    PageSize="10"
+                    ShowSearchBox="true"
+                    SearchBoxNullText="Buscar empleado..."
+                    CustomizeElement="Grid_CustomizeElement"
+                    TextAlignment="GridTextAlignment.Center"
+                    HighlightRowOnHover="true"
+                    CssClass="w-100">
+                <Columns>
+                    <DxGridDataColumn FieldName="Paterno" Caption="Apellido Paterno" />
+                    <DxGridDataColumn FieldName="Materno" Caption="Apellido Materno" />
+                    <DxGridDataColumn FieldName="Nombre" Caption="Nombre" />
+                    <DxGridDataColumn FieldName="Rfc" Caption="RFC" Width="140px" />
+                    <DxGridDataColumn FieldName="Nss" Caption="NSS" Width="120px" />
+                    <DxGridDataColumn FieldName="IdDepartamento" Caption="Departamento" Width="150px" TextAlignment="GridTextAlignment.Center">
+                        <CellDisplayTemplate>
+                            @{
+                                var e = (EmpleadoModel)context.DataItem;
+                                var depto = DeptosList.FirstOrDefault(d => d.Id == e.IdDepartamento);
+                            }
+                            <span>@(depto?.Nombre ?? "-")</span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                    <DxGridDataColumn FieldName="IdPuesto" Caption="Puesto" Width="150px" TextAlignment="GridTextAlignment.Center">
+                        <CellDisplayTemplate>
+                            @{
+                                var e = (EmpleadoModel)context.DataItem;
+                                var puesto = PuestosList.FirstOrDefault(p => p.Id == e.IdPuesto);
+                            }
+                            <span>@(puesto?.Nombre ?? "-")</span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                    <DxGridDataColumn Caption="Acciones" Width="80px" TextAlignment="GridTextAlignment.Center">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (EmpleadoModel)context.DataItem;
+                            }
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                        title="Editar"
+                                        @onclick="@(() => AbrirFormulario(item))">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </div>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                </Columns>
+                <EmptyDataAreaTemplate>
+                    <div class="empty-grid-container">
+                        <div class="empty-icon-wrapper">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h4>Sin empleados registrados</h4>
+                        <p>Registre al menos un empleado.</p>
+                    </div>
+                </EmptyDataAreaTemplate>
+            </DxGrid>
+        </div>
+    }
+</div>
+
+
+<DxWindow @bind-Visible="@mostrarFormulario"
+          HeaderText="@(Modelo.Id == 0 ? "Nuevo Empleado" : $"Editar a empleado: {Modelo.Paterno} {Modelo.Materno} {Modelo.Nombre}")"
+          Width="650px"
+          MaxWidth="95%"
+          Height="auto"
+          Modal="true"
+          ShowFooter="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          HeaderCssClass="bg-primary text-white"
+          @ref="WindowRef"
+          @bind-PositionX="@ventanaX"
+          @bind-PositionY="@ventanaY"
+          BodyCssClass="p-0">
+
+    <BodyTextTemplate>
+        <div class="p-4">
+            <EditForm EditContext="@editContext" Context="formContext">
+                <DataAnnotationsValidator />
+
+                <DxTabs>
+                    @* ── Tab 1: Datos Personales ── *@
+                    <DxTabPage Text="Datos Personales">
+                        <div class="row g-3 mt-2">
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Apellido Paterno:</label>
+                                <DxTextBox @bind-Text="@Modelo.Paterno" NullText="Ej. García" />
+                                <ValidationMessage For="@(() => Modelo.Paterno)" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Apellido Materno:</label>
+                                <DxTextBox @bind-Text="@Modelo.Materno" NullText="Ej. López" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Nombre(s):</label>
+                                <DxTextBox @bind-Text="@Modelo.Nombre" NullText="Ej. Juan Carlos" />
+                                <ValidationMessage For="@(() => Modelo.Nombre)" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">RFC:</label>
+                                <DxTextBox @bind-Text="@Modelo.Rfc" NullText="13 caracteres" />
+                                <ValidationMessage For="@(() => Modelo.Rfc)" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">CURP:</label>
+                                <DxTextBox @bind-Text="@Modelo.Curp" NullText="18 caracteres" />
+                                <ValidationMessage For="@(() => Modelo.Curp)" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">NSS:</label>
+                                <DxTextBox @bind-Text="@Modelo.Nss" NullText="11 caracteres" />
+                                <ValidationMessage For="@(() => Modelo.Nss)" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Sexo:</label>
+                                <DxComboBox Data="@sexoOpciones" @bind-Value="@Modelo.Sexo"
+                                            TextFieldName="Texto" ValueFieldName="Valor"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Estado Civil:</label>
+                                <DxComboBox Data="@estadoCivilOpciones" @bind-Value="@Modelo.EstadoCivil"
+                                            TextFieldName="Texto" ValueFieldName="Valor"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Nacimiento:</label>
+                                <DxDateEdit @bind-Date="@Modelo.FechaNacimientoDt" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Ingreso:</label>
+                                <DxDateEdit @bind-Date="@Modelo.FechaIngresoDt" />
+                            </div>
+                        </div>
+                    </DxTabPage>
+
+                    @* ── Tab 2: Dirección ── *@
+                    <DxTabPage Text="Dirección">
+                        <div class="row g-3 mt-2">
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Calle:</label>
+                                <DxTextBox @bind-Text="@Modelo.Calle" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small">C.P.:</label>
+                                <DxTextBox @bind-Text="@Modelo.Cp" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Colonia:</label>
+                                <DxTextBox @bind-Text="@Modelo.Colonia" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Municipio:</label>
+                                <DxTextBox @bind-Text="@Modelo.Municipio" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Localidad:</label>
+                                <DxTextBox @bind-Text="@Modelo.Localidad" />
+                            </div>
+                        </div>
+                    </DxTabPage>
+
+                    @* ── Tab 3: Datos Laborales ── *@
+                    <DxTabPage Text="Datos Laborales" >
+                        <div class="row g-3 mt-2">
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Departamento:</label>
+                                <DxComboBox Data="@DeptosList"
+                                            Value="@Modelo.IdDepartamento"
+                                            ValueExpression="@(() => Modelo.IdDepartamento)"
+                                            ValueChanged="@((int valor) => OnDepartamentoChanged(valor))"
+                                            TextFieldName="Nombre"
+                                            ValueFieldName="Id"
+                                            NullText="Seleccione..."
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                                <ValidationMessage For="@(() => Modelo.IdDepartamento)" />
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Puesto:</label>
+                                <DxComboBox Data="@PuestosListAux" @bind-Value="@Modelo.IdPuesto"
+                                            TextFieldName="Nombre" ValueFieldName="Id" NullText="Seleccione..."
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+
+                                <ValidationMessage For="@(() => Modelo.IdPuesto)" />
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Turno:</label>
+                                <DxComboBox Data="@TurnosList" @bind-Value="@Modelo.IdTurno"
+                                            TextFieldName="Descripcion" ValueFieldName="Id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Tipo de Régimen:</label>
+                                <DxComboBox Data="@TipoRegimenList" @bind-Value="@Modelo.IdTipoRegimen"
+                                            TextFieldName="Descripcion" ValueFieldName="Id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Tipo de Contrato:</label>
+                                <DxComboBox Data="@TipoContratoList" @bind-Value="@Modelo.IdTipoContrato"
+                                            TextFieldName="Descripcion" ValueFieldName="Id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Tipo de Jornada:</label>
+                                <DxComboBox Data="@TipoJornadaList" @bind-Value="@Modelo.IdTipoJornada"
+                                            TextFieldName="Descripcion" ValueFieldName="Id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+                           
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">Observaciones:</label>
+                                <DxMemo @bind-Text="@Modelo.Observaciones" Rows="3" />
+                            </div>
+                        </div>
+                    </DxTabPage>
+
+                    @* ── Tab 4: Contacto y Banco ── *@
+                    <DxTabPage Text="Contacto y Banco" >
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Teléfono:</label>
+                                <DxMaskedInput @bind-value="@Modelo.Telefono" Mask="(000)000-0000">
+                                    <DxTextMaskProperties SaveLiteral="false"/>
+                                </DxMaskedInput>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Correo Electrónico:</label>
+                                <DxTextBox @bind-Text="@Modelo.Correo" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Banco:</label>
+                                <DxComboBox Data="@BancosList" @bind-Value="@Modelo.IdBanco"
+                                            TextFieldName="Descripcion" ValueFieldName="Id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">No. de Cuenta Bancaria (CLABE):</label>
+                                <DxMaskedInput @bind-value="@Modelo.NoCuenta" Mask="9999-9999-9999-9999-9999">
+                                    <DxTextMaskProperties SaveLiteral="false"/>
+                                </DxMaskedInput>
+                            </div>
+                        </div>
+                    </DxTabPage>
+                </DxTabs>
+            </EditForm>
+        </div>
+    </BodyTextTemplate>
+
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Cancelar"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      Click="CerrarFormulario"
+                      CssClass="me-2" />
+            <DxButton Text="Guardar Cambios"
+                      RenderStyle="ButtonRenderStyle.Success"
+                      IconCssClass="bi bi-save"
+                      Click="Guardar" />
+        </div>
+    </FooterTextTemplate>
+</DxWindow>
