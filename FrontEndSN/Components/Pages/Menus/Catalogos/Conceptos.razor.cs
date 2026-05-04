@@ -23,39 +23,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		DxWindow WindowRef;
 
 
-		public bool GravadoIsrBool
-		{
-			get => Modelo.GravadoIsr == 'S';
-			set => Modelo.GravadoIsr = value ? 'S' : 'N';
-		}
-
-		// Propiedad para Activo
-		public bool ActivoBool
-		{
-			get => Modelo.Activo == 'S';
-			set => Modelo.Activo = value ? 'S' : 'N';
-		}
-
-		// Propiedad para Afecta Neto
-		public bool AfectaNetoBool
-		{
-			get => Modelo.AfectaNeto == 'S';
-			set => Modelo.AfectaNeto = value ? 'S' : 'N';
-		}
-
-		// Propiedad para Integra SBC
-		public bool IntegraSBCBool
-		{
-			get => Modelo.IntegraSBC == 'S';
-			set => Modelo.IntegraSBC = value ? 'S' : 'N';
-		}
-
-		// Propiedad para Visible en Recibo
-		public bool VisibleEnReciboBool
-		{
-			get => Modelo.VisibleEnRecibo == 'S';
-			set => Modelo.VisibleEnRecibo = value ? 'S' : 'N';
-		}
+		
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -96,8 +64,39 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 		private async Task GuardarConcepto()
 		{
-			// Lógica para enviar a tu API/Base de datos
-			// IMPORTANTE: Aquí mapearías los "bool" (AfectaNeto) a los chars 'S'/'N' de tu entidad real
+			if (editContext == null || !editContext.Validate()) return;
+
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var url = Modelo.Id == 0
+					? "api/Conceptos/Agregar"
+					: $"api/Conceptos/Editar/{Modelo.Id}";
+
+				var request = new HttpRequestMessage(HttpMethod.Post, url);
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+				request.Content = JsonContent.Create(Modelo);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					await JS.InvokeVoidAsync("notifier.success",
+						Modelo.Id == 0 ? "Movimiento registrado exitosamente." : "Movimiento actualizado correctamente.");
+					mostrarModal = false;
+					await CargarConceptos();
+				}
+				else
+				{
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo guardar: " + (errorData?.Message ?? "Error inesperado"));
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
 
 			await CargarConceptos(); // Refrescar Grid
 			CerrarFormulario();
@@ -255,7 +254,40 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			[JsonPropertyName("id_concepto_sat")]
 			public int? IdConceptoSat { get; set; }
 
+			[JsonIgnore]
+			public bool GravadoIsrBool
+			{
+				get => GravadoIsr == 'S';
+				set => GravadoIsr = value ? 'S' : 'N';
+			}
 
+			[JsonIgnore]
+			public bool ActivoBool
+			{
+				get => Activo == 'S';
+				set => Activo = value ? 'S' : 'N';
+			}
+
+			[JsonIgnore]
+			public bool AfectaNetoBool
+			{
+				get => AfectaNeto == 'S';
+				set => AfectaNeto = value ? 'S' : 'N';
+			}
+
+			[JsonIgnore]
+			public bool IntegraSBCBool
+			{
+				get => IntegraSBC == 'S';
+				set => IntegraSBC = value ? 'S' : 'N';
+			}
+
+			[JsonIgnore]
+			public bool VisibleEnReciboBool
+			{
+				get => VisibleEnRecibo == 'S';
+				set => VisibleEnRecibo = value ? 'S' : 'N';
+			}
 		}
 
 	public class ItemCatalogoString { public char Clave { get; set; } public string Nombre { get; set; } }

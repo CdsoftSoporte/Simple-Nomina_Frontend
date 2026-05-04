@@ -227,19 +227,6 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			}
 		}
 
-
-		//este método es propio del DxGrid, este funciona para acceder a propiedades dentro del mismo y poder editar cosas de él (en este caso
-		//lo estoy utilizando para poner un width: 100% al Searchbox, se pueden editar más cosas de css e incluso asignarle clases)
-		void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
-		{
-			if (e.ElementType == GridElementType.SearchBoxContainer)
-			{
-				e.Style = "Width: 100%;";
-
-
-			}
-		}
-
 		private async Task CerrarFormulario()
 		{
 			MostrarModal = false;

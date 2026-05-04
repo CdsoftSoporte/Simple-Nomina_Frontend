@@ -57,7 +57,7 @@ namespace FrontEndSN.Clases
 				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
 				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
  
-				var request = new HttpRequestMessage(HttpMethod.Get, "api/Empleados/ListarDTO");
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/Empleados/Listar");
 				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
 				var response = await Http.SendAsync(request);
@@ -158,7 +158,7 @@ namespace FrontEndSN.Clases
 				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
 				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
 
-				var request = new HttpRequestMessage(HttpMethod.Get, $"api/Conceptos/Listar");
+				var request = new HttpRequestMessage(HttpMethod.Get, $"api/Conceptos/ListarDTO");
 				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
 				var response = await Http.SendAsync(request);

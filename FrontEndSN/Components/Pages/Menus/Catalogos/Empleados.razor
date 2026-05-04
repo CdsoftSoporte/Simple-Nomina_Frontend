@@ -110,7 +110,7 @@
           HeaderText="@(Modelo.Id == 0 ? "Nuevo Empleado" : $"Editar a empleado: {Modelo.Paterno} {Modelo.Materno} {Modelo.Nombre}")"
           Width="650px"
           MaxWidth="95%"
-          Height="auto"
+          Height="650px"
           Modal="true"
           ShowFooter="true"
           CloseOnEscape="true"
@@ -119,6 +119,7 @@
           @ref="WindowRef"
           @bind-PositionX="@ventanaX"
           @bind-PositionY="@ventanaY"
+          AllowResize="true"
           BodyCssClass="p-0">
 
     <BodyTextTemplate>

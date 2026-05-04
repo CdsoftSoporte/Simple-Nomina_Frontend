@@ -129,18 +129,19 @@
                                 <DxComboBox Data="@catalogoTipos" 
                                             @bind-Value="Modelo.Tipo"
                                             ValueFieldName="Clave"
+                                            ReadOnly="true"
                                             TextFieldName="Nombre" />
                             </div>
                             <div class="col-md-6 d-flex align-items-end pb-2">
-                                <DxCheckBox @bind-Checked="ActivoBool" LabelPosition="LabelPosition.Right">Activo en el Sistema</DxCheckBox>
+                                <DxCheckBox @bind-Checked="Modelo.ActivoBool" LabelPosition="LabelPosition.Right">Activo en el Sistema</DxCheckBox>
                             </div>
 
                             <div class="col-12 mt-4">
                                 <h6 class="text-muted border-bottom pb-2">Comportamiento del Concepto</h6>
                                 <div class="d-flex flex-wrap gap-4 mt-3">
-                                    <DxCheckBox @bind-Checked="AfectaNetoBool">Afecta al Neto a Pagar</DxCheckBox>
-                                    <DxCheckBox @bind-Checked="IntegraSBCBool">Integra SBC (IMSS)</DxCheckBox>
-                                    <DxCheckBox @bind-Checked="VisibleEnReciboBool">Imprimir en Recibo</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.AfectaNetoBool">Afecta al Neto a Pagar</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.IntegraSBCBool">Integra SBC (IMSS)</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.VisibleEnReciboBool">Imprimir en Recibo</DxCheckBox>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +170,7 @@
                                 <h6 class="text-muted border-bottom pb-2">Reglas de ISR (Exenciones)</h6>
                             </div>
                             <div class="col-md-12 mb-2">
-                                <DxCheckBox @bind-Checked="GravadoIsrBool">Este concepto es Gravable para ISR</DxCheckBox>
+                                <DxCheckBox @bind-Checked="Modelo.GravadoIsrBool">Este concepto es Gravable para ISR</DxCheckBox>
                             </div>
                             
                             @if (Modelo.GravadoIsr=='S')

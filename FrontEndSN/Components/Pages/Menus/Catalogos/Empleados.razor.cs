@@ -288,8 +288,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 			int anchoPantalla = await JS.InvokeAsync<int>("eval", "window.innerWidth");
 
-			// 2. Calculamos el centro: (Mitad de pantalla) - (Mitad del modal)
-			// Si el modal mide 600px, restamos 300.
+			//// 2. Calculamos el centro: (Mitad de pantalla) - (Mitad del modal)
+			//// Si el modal mide 600px, restamos 300.
 			ventanaX = (anchoPantalla / 2) - 325;
 			ventanaY = 100; // Una altura cómoda desde el techo
 			mostrarFormulario = true;
