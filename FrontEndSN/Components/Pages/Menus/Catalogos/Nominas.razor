@@ -243,73 +243,96 @@
 
 @* ── Modal Agregar/Editar Nóminas ── *@
 <DxWindow @bind-Visible="@isModalVisible"
-          HeaderText="@(Modelo.id == 0 ? "Nueva Nómina" : "Editar Nómina")"
+          HeaderText="@(Modelo.id == 0 ? "Nueva Nómina" : $"Editar {Modelo.descripcion}")"
           Width="550px"
           AllowResize="false"
           ShowCloseButton="true"
           CloseOnEscape="true"
+          ShowFooter="true"
           HeaderCssClass="bg-primary text-white"
           Modal="true">
     <BodyTextTemplate>
         <EditForm EditContext="@editContext" Context="formContext"style="width:90%!important;">
             <DataAnnotationsValidator />
-            <div class="p-2 w-100">
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">Descripción:</label>
-                        <DxTextBox @bind-Text="@Modelo.descripcion"
-                                   NullText="Ej. Nómina Quincenal Planta"
-                                   CssClass="custom-input" />
-                        <ValidationMessage For="@(() => Modelo.descripcion)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Tipo de Nómina:</label>
-                        <DxComboBox Data="@tiposNomina"
+            <DxTabs CssClass="custom-tabs mt-2 mb-4">
+                <DxTabPage Text="Datos Generales">
+                    <div class="p-2 w-100">
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Descripción:</label>
+                                <DxTextBox @bind-Text="@Modelo.descripcion"
+                                        NullText="Ej. Nómina Quincenal Planta"
+                                        CssClass="custom-input" />
+                            <ValidationMessage For="@(() => Modelo.descripcion)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tipo de Nómina:</label>
+                                <DxComboBox Data="@tiposNomina"
                                     @bind-Value="@Modelo.tipo"
                                     TextFieldName="Texto"
                                     ValueFieldName="Valor"
                                     CssClass="white-border-input" />
-                        <ValidationMessage For="@(() => Modelo.tipo)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Ejercicio:</label>
-                        <DxSpinEdit @bind-Value="@ejercicioInt"
-                                    MinValue="2020"
-                                    MaxValue="2099"
-                                    CssClass="white-border-input" />
-                        <ValidationMessage For="@(() => Modelo.ejercicio)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Registro Patronal:</label>
-                        <DxComboBox Data="@PatronesList"
+                                <ValidationMessage For="@(() => Modelo.tipo)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ejercicio:</label>
+                                <DxSpinEdit @bind-Value="@ejercicioInt"
+                                     MinValue="2020"
+                                     MaxValue="2099"
+                                     CssClass="white-border-input" />
+                                <ValidationMessage For="@(() => Modelo.ejercicio)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                    <label class="form-label fw-bold">Registro Patronal:</label>
+                                    <DxComboBox Data="@PatronesList"
                                     @bind-Value="@Modelo.id_patron"
                                     TextFieldName="razon_social"
                                     ValueFieldName="id"
                                     NullText="Seleccione..."
                                     CssClass="white-border-input" />
-                        <ValidationMessage For="@(() => Modelo.id_patron)" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Estatus:</label>
-                        <DxComboBox Data="@estatusOpciones"
+                                <ValidationMessage For="@(() => Modelo.id_patron)" />
+                            </div>
+
+                             <div class="col-md-6">
+                                <label class="form-label fw-bold">Estatus:</label>
+                                <DxComboBox Data="@estatusOpciones"
                                     @bind-Value="@Modelo.activo"
                                     TextFieldName="Texto"
                                     ValueFieldName="Valor"
                                     CssClass="white-border-input" />
+                             </div>
+
+                        </div>
+                
                     </div>
-                </div>
-                <div class="d-flex justify-content-end gap-2 mt-3"style="margin-top:10px !important;">
-                    <DxButton Text="Cancelar"
-                              Click="() => isModalVisible = false"
-                              RenderStyle="ButtonRenderStyle.Secondary" />
-                    <DxButton Text="Guardar"
-                              Click="Guardar"
-                              RenderStyle="ButtonRenderStyle.Primary"
-                              IconCssClass="bi bi-check2-circle" />
-                </div>
-            </div>
+                </DxTabPage>
+
+                <DxTabPage Text="Tipo de cálculo">
+
+
+
+                </DxTabPage>
+
+
+            </DxTabs>
         </EditForm>
     </BodyTextTemplate>
+
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100" >
+            <DxButton Text="Cancelar"
+                      Click="() => isModalVisible = false"
+                      RenderStyle="ButtonRenderStyle.Secondary" />
+            <DxButton Text="Guardar"
+                      Click="Guardar"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      IconCssClass="bi bi-check2-circle" />
+        </div>
+    </FooterTextTemplate>
 </DxWindow>
 
 

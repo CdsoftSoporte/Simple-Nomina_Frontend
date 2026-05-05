@@ -79,6 +79,13 @@
                                         <i class="bi bi-pencil-fill"></i>
                                     </button>
                                 }
+                                else
+                                {
+                                    <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom"
+                                            @onclick="() => AbrirFormulario((ConceptoModel)context.DataItem)">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
+                                }
                             </CellDisplayTemplate>
                         </DxGridCommandColumn>
                     </Columns>
@@ -91,7 +98,7 @@
     }
 </div>
 
-                                @* ── Ventana Modal (DxWindow) pruebaaaa ── *@
+                                @* ── Ventana Modal (DxWindow) ── *@
 <DxWindow Visible="@mostrarModal"
               VisibleChanged="@((bool visible) => { if (!visible) CerrarFormulario(); })"
               HeaderText="@(Modelo.Id == 0 ? "Nuevo Concepto" : $"Editar Concepto {Modelo.Id} - {Modelo.Descripcion}")"
@@ -121,7 +128,7 @@
                             </div>
                             <div class="col-md-9">
                                 <label class="form-label">Descripción</label>
-                                <DxTextBox @bind-Text="Modelo.Descripcion" />
+                                <DxTextBox @bind-Text="Modelo.Descripcion" ReadOnly="esEdicion" />
                             </div>
                             
                             <div class="col-md-6">
@@ -133,15 +140,15 @@
                                             TextFieldName="Nombre" />
                             </div>
                             <div class="col-md-6 d-flex align-items-end pb-2">
-                                <DxCheckBox @bind-Checked="Modelo.ActivoBool" LabelPosition="LabelPosition.Right">Activo en el Sistema</DxCheckBox>
+                                <DxCheckBox @bind-Checked="Modelo.ActivoBool" ReadOnly="esEdicion" LabelPosition="LabelPosition.Right">Activo en el Sistema</DxCheckBox>
                             </div>
 
                             <div class="col-12 mt-4">
                                 <h6 class="text-muted border-bottom pb-2">Comportamiento del Concepto</h6>
                                 <div class="d-flex flex-wrap gap-4 mt-3">
-                                    <DxCheckBox @bind-Checked="Modelo.AfectaNetoBool">Afecta al Neto a Pagar</DxCheckBox>
-                                    <DxCheckBox @bind-Checked="Modelo.IntegraSBCBool">Integra SBC (IMSS)</DxCheckBox>
-                                    <DxCheckBox @bind-Checked="Modelo.VisibleEnReciboBool">Imprimir en Recibo</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.AfectaNetoBool" ReadOnly="esEdicion">Afecta al Neto a Pagar</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.IntegraSBCBool" ReadOnly="esEdicion">Integra SBC (IMSS)</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.VisibleEnReciboBool" ReadOnly="esEdicion">Imprimir en Recibo</DxCheckBox>
                                 </div>
                             </div>
                         </div>
@@ -152,17 +159,21 @@
                         <div class="row g-3 mt-1">
                             <div class="col-12">
                                 <h6 class="text-muted border-bottom pb-2">Regla de Importe</h6>
+                                <DxCheckBox @bind-Checked="Modelo.CalculoAutomaticoBool" ReadOnly="esEdicion">Cálculo Automático en cada periodo de nómina</DxCheckBox>
                             </div>
+
                             <div class="col-md-6">
                                 <label class="form-label">Calcular en base a:</label>
                                 <DxComboBox Data="@catalogoBases"
                                             @bind-Value="Modelo.BaseCalculo"
                                             ValueFieldName="Id"
+                                            ReadOnly="esEdicion"
                                             TextFieldName="Nombre" />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Valor o Cantidad:</label>
-                                <DxSpinEdit @bind-Value="Modelo.Valorcalculo" 
+                                <DxSpinEdit @bind-Value="Modelo.Valorcalculo"
+                                            ReadOnly="esEdicion"
                                             Mask="@(Modelo.BaseCalculo == 1 ? "C2" : "N4")" />
                             </div>
 
@@ -170,7 +181,7 @@
                                 <h6 class="text-muted border-bottom pb-2">Reglas de ISR (Exenciones)</h6>
                             </div>
                             <div class="col-md-12 mb-2">
-                                <DxCheckBox @bind-Checked="Modelo.GravadoIsrBool">Este concepto es Gravable para ISR</DxCheckBox>
+                                <DxCheckBox @bind-Checked="Modelo.GravadoIsrBool" ReadOnly="esEdicion">Este concepto es Gravable para ISR</DxCheckBox>
                             </div>
                             
                             @if (Modelo.GravadoIsr=='S')
@@ -180,12 +191,14 @@
                                     <DxComboBox Data="@catalogoExenciones"
                                                 @bind-Value="Modelo.ExentoTipo"
                                                 ValueFieldName="Id"
+                                                ReadOnly="esEdicion"
                                                 TextFieldName="Nombre" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Límite Exento:</label>
                                     <DxSpinEdit @bind-Value="Modelo.ExentoLimite" 
-                                                Enabled="@(Modelo.ExentoTipo != 0)" 
+                                                Enabled="@(Modelo.ExentoTipo != 0)"
+                                                ReadOnly="esEdicion"
                                                 Mask="N4" />
                                 </div>
                             }
@@ -209,6 +222,7 @@
                                             TextFieldName="Descripcion"
                                             SearchMode="ListSearchMode.AutoSearch"
                                             ListRenderMode="ListRenderMode.Virtual"
+                                            ReadOnly="esEdicion"
                                             ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                             </div>
                         </div>
@@ -217,8 +231,8 @@
             </EditForm>
             </div>
         </BodyTemplate>
-
     <FooterTextTemplate>
+        @if(esEdicion==false){
         <div class="d-flex justify-content-end w-100">
             <DxButton Text="Cancelar"
                       RenderStyle="ButtonRenderStyle.Secondary"
@@ -229,5 +243,6 @@
                       IconCssClass="bi bi-save"
                       Click="GuardarConcepto" />
         </div>
+        }
     </FooterTextTemplate>
 </DxWindow>

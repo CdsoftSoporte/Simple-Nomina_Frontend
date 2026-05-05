@@ -200,7 +200,16 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				Modelo = item;
 			}
 
-			editContext = new EditContext(Modelo);
+			if (Modelo.EsSistema == 'S')
+			{
+				esEdicion = true;
+			}
+			else
+			{
+				esEdicion = false;
+			}
+
+				editContext = new EditContext(Modelo);
 			await PrepararVentana(600);
 			mostrarModal = true;
 			StateHasChanged();
@@ -254,6 +263,9 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			[JsonPropertyName("id_concepto_sat")]
 			public int? IdConceptoSat { get; set; }
 
+			[JsonPropertyName("calculo_automatico")]
+			public char CalculoAutomatico { get; set; }
+
 			[JsonIgnore]
 			public bool GravadoIsrBool
 			{
@@ -288,7 +300,14 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				get => VisibleEnRecibo == 'S';
 				set => VisibleEnRecibo = value ? 'S' : 'N';
 			}
-		}
+
+			[JsonIgnore]
+			public bool CalculoAutomaticoBool
+			{
+				get => CalculoAutomatico == 'S';
+				set => CalculoAutomatico = value ? 'S' : 'N';
+			}
+	}
 
 	public class ItemCatalogoString { public char Clave { get; set; } public string Nombre { get; set; } }
 	public class ItemCatalogoInt { public int Id { get; set; } public string Nombre { get; set; } }
