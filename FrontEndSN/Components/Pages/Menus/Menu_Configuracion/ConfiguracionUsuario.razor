@@ -4,6 +4,7 @@
 @using System.IdentityModel.Tokens.Jwt
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject HttpClient Http
 <PageTitle>Configuración del usuario</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
@@ -21,6 +22,180 @@
         </div>
        
     </header>
+
+
+    @if (Cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="spinner-custom mb-3"></div>
+        </div> 
+    }
+    else
+    {
+        <div class="row justify-content-center w-10">
+            <div class="col-lg-8 col-md-10">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4">
+
+                        <EditForm Model="@Modelo" OnValidSubmit="ConfirmarGuardar">
+                            <DataAnnotationsValidator />
+
+                            <DxTabs CssClass="custom-tabs mb-4">
+
+                                @* Pestaña 1: Datos Generales *@
+                                <DxTabPage Text="Datos Generales">
+                                    <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+                                        <div class="bg-primary p-3">
+                                            <h5 class="text-white m-0">
+                                                <i class="bi bi-person-fill"></i>Datos Generales
+                                            </h5>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-3 mt-2 px-2">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Nombre Completo</label>
+                                            <DxTextBox @bind-Text="Modelo.NombreCompleto"
+                                                       NullText="Ej. Axel López"
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"/>
+                                            <ValidationMessage For="@(() => Modelo.NombreCompleto)" class="text-danger small" />
+                                        </div>
+                                        <br />
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Nombre de Usuario (Login)</label>
+                                            <DxTextBox @bind-Text="Modelo.NombreUsuario"
+                                                       NullText="Ej. axl.01" />
+                                            <ValidationMessage For="@(() => Modelo.NombreUsuario)" class="text-danger small" />
+                                        </div>
+                                    </div>
+                                </DxTabPage>
+
+                                @* Pestaña 2: Contacto *@
+                                <DxTabPage Text="Contacto">
+                                    <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+                                        <div class="bg-primary p-3">
+                                            <h5 class="text-white m-0">
+                                                <i class="bi bi-send-fill"></i>Contacto
+                                            </h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="row gy-4 mt-2 px-2">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Correo Electrónico</label>
+                                            <DxTextBox @bind-Text="Modelo.Correo"
+                                                       NullText="ejemplo@correo.com" />
+                                            <ValidationMessage For="@(() => Modelo.Correo)" class="text-danger small" />
+                                        </div>
+                                        <br />
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Teléfono</label>
+                                            <DxMaskedInput @bind-value="@Modelo.Telefono" Mask="999-999-9999">
+                                                <DxTextMaskProperties SaveLiteral="false" />
+                                            </DxMaskedInput>
+                                            <ValidationMessage For="@(() => Modelo.Telefono)" class="text-danger small" />
+                                        </div>
+                                    </div>
+                                </DxTabPage>
+
+                                @* Pestaña 3: Seguridad *@
+                                <DxTabPage Text="Seguridad (Contraseña)">
+
+                                    <div class="card shadow-sm border-0 p-0 fade-in-all overflow-hidden mb-4">
+                                        <div class="bg-primary p-3">
+                                            <h5 class="text-white m-0">
+                                                <i class="bi bi-person-fill-lock"></i>Seguridad
+                                            </h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-2 px-2">
+                                        <div class="col-12">
+                                            <div class="alert alert-warning d-flex align-items-center py-2" role="alert">
+                                                <i class="bi bi-info-circle-fill me-2"></i>
+                                                <small>Solo llena estos campos si deseas cambiar tu contraseña actual.</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-4">
+                                            <label class="form-label fw-bold">Nueva Contraseña</label>
+                                            <div class="input-group dx-style-group w-100 flex-nowrap">
+                                                <input type="@(verActual ? "text" : "password")"
+                                                       class="form-control dx-style-input"
+                                                       placeholder="Ingrese su contraseña actual"
+                                                       @bind-value="Modelo.Contrasena"
+                                                       @bind-value:event="oninput" />
+
+                                                <button class="btn dx-style-btn"
+                                                        type="button"
+                                                        @onclick="() => verActual = !verActual"
+                                                        tabindex="-1">
+                                                    <i class="bi @(verActual ? "bi-eye-slash" : "bi-eye")"></i>
+                                                </button>
+                                            </div>
+                                            <ValidationMessage For="@(() => Modelo.Contrasena)" class="text-danger small" />
+                                        </div>
+                                        <br />
+                                        <div class="col-md-12 mb-4">
+                                            <label class="form-label fw-bold">Nueva Contraseña</label>
+                                            <div class="input-group dx-style-group w-100 flex-nowrap">
+                                                <input type="@(verNueva ? "text" : "password")"
+                                                       class="form-control dx-style-input"
+                                                       placeholder="Ingrese su nueva contraseña"
+                                                       @bind-value="Modelo.NuevaContrasena"
+                                                       @bind-value:event="oninput" />
+
+                                                <button class="btn dx-style-btn"
+                                                        type="button"
+                                                        @onclick="() => verNueva = !verNueva"
+                                                        tabindex="-1">
+                                                    <i class="bi @(verNueva ? "bi-eye-slash" : "bi-eye")"></i>
+                                                </button>
+                                            </div>
+                                            <ValidationMessage For="@(() => Modelo.NuevaContrasena)" class="text-danger small" />
+                                        </div>
+                                        <br />
+                                        <div class="col-md-12 mb-4">
+                                            <label class="form-label fw-bold">Nueva Contraseña</label>
+                                            <div class="input-group dx-style-group flex-nowrap">
+                                                <input type="@(verConfirmar ? "text" : "password")"
+                                                       class="form-control dx-style-input"
+                                                       placeholder="Confirmar nueva contraseña"
+                                                       @bind-value="ConfirmarContrasena"
+                                                       @bind-value:event="oninput" />
+
+                                                <button class="btn dx-style-btn"
+                                                        type="button"
+                                                        @onclick="() => verConfirmar = !verConfirmar"
+                                                        tabindex="-1">
+                                                    <i class="bi @(verConfirmar ? "bi-eye-slash" : "bi-eye")"></i>
+                                                </button>
+                                            </div>
+                                            <ValidationMessage For="@(() => ConfirmarContrasena)" class="text-danger small" />
+                                        </div>
+                                    </div>
+                                </DxTabPage>
+
+                            </DxTabs>
+
+                          @*  <div class="text-end mt-5 pt-3 border-top">*@
+                            <div class="d-flex justify-content-end mb-4">
+                                <br>
+                                <DxButton Text="Cancelar"
+                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                          CssClass="me-2"
+                                          Click='() => Nav.NavigateTo("/")' />
+                                <DxButton Text="Guardar y Reiniciar Sesión"
+                                          RenderStyle="ButtonRenderStyle.Primary"
+                                          SubmitFormOnClick="true"
+                                          IconCssClass="bi bi-check2-circle" />
+                            </div>
+                        </EditForm>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
    
 </div>

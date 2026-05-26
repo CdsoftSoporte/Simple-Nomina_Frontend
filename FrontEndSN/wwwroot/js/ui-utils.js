@@ -15,10 +15,10 @@
         Toast.fire({
             icon: 'success',
             title: message,
-            theme:'auto'
+            theme: 'auto'
         });
     },
-    //mensaje de error
+    // Mensaje de error
     error: function (message) {
         Swal.fire({
             icon: 'error',
@@ -28,7 +28,7 @@
             theme: 'auto'
         });
     },
-    //mensaje para confirmar
+    // Mensaje para confirmar
     confirm: async function (title, text) {
         const result = await Swal.fire({
             title: title,
@@ -42,7 +42,36 @@
             theme: 'auto'
         });
         return result.isConfirmed;
-    },
-   
+    }
+}; // Aquí termina correctamente el objeto notifier
 
+// LA FUNCIÓN DE EXCEL VA AFUERA, COMO UNA FUNCIÓN GLOBAL INDEPENDIENTE
+window.DescargarExcel = async (contentStreamReference, nombre) => {
+    const arrayBuffer = await contentStreamReference.arrayBuffer();
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+
+    const anchorElement = document.createElement('a');
+    anchorElement.href = url;
+    anchorElement.download = nombre;
+    anchorElement.click();
+
+    anchorElement.remove();
+    URL.revokeObjectURL(url);
+};
+
+window.AbrirImpresion = (html) => {
+    //  Convertimos el string HTML en un objeto binario (Blob)
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+
+   
+    const url = URL.createObjectURL(blob);
+
+
+    window.open(url, "_blank", "noopener=yes");
+
+    // Limpieza de memoria en la pestaña
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 5000);
 };

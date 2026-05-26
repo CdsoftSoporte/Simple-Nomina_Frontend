@@ -44,10 +44,12 @@ namespace FrontEndSN.Clases
 		{
 			int anioActual = DateTime.Now.Year;
 			//siempre llenará de 2026 al actual +1
+			ListaEjercicios ??= new List<EjerciciosItem>();
 			for (int i = 2026; i <= anioActual + 1; i++)
 			{
 				ListaEjercicios.Add(new EjerciciosItem { Ejercicio = i.ToString() });
 			}
+			
 		}
 
 		protected async Task CargarEmpleadosParaCombos()

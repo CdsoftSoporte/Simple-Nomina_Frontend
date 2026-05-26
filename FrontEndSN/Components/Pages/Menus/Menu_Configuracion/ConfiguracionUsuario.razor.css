@@ -1,0 +1,107 @@
+﻿/* Ajustes limpios para DxTabs */
+::deep .custom-tabs .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 1.5rem;
+}
+
+::deep .custom-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    position: relative;
+    transition: color 0.3s ease;
+    background: transparent;
+}
+
+    ::deep .custom-tabs .nav-link:hover {
+        color: #495057;
+    }
+
+    ::deep .custom-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: transparent;
+    }
+
+        ::deep .custom-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #0d6efd;
+            border-radius: 2px 2px 0 0;
+        }
+
+    ::deep .custom-tabs .nav-link i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+::deep .dx-edit-button {
+    border: none !important;
+    background: transparent !important;
+    color: #6c757d;
+}
+
+    ::deep .dx-edit-button:hover {
+        color: #0d6efd !important;
+    }
+
+
+/* Contenedor del grupo con ancho total */
+.dx-style-group {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    /* Usamos tu variable de fondo aquí */
+    background-color: var(--var-bg-primary) !important;
+    display: flex !important;
+    align-items: stretch; /* Esto evita que el botón se caiga o quede corto */
+    overflow: hidden;
+    max-width: 70%;
+}
+
+    .dx-style-group:focus-within {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+/* El input nativo */
+.dx-style-input {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    color: inherit;
+    padding: 0.5rem 0.75rem;
+    flex: 1 1 auto;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* El botón del ojito */
+.dx-style-btn {
+    border: none !important;
+    background-color: transparent !important;
+    color: inherit;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center; /* Centra el icono verticalmente */
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .dx-style-btn:hover {
+        color: #0d6efd !important;
+    }
+
+/* Etiqueta */
+.custom-dx-label {
+    font-size: 0.85rem;
+    color: #495057;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    display: block;
+}
