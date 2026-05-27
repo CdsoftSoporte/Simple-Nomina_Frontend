@@ -1,21 +1,16 @@
 ﻿@page "/calculo_nomina"
 @using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
 @inherits VentanaBase
 
 <div class="dashboard-container page-header-fade fade-in-all">
 
     @* --- CABECERA --- *@
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <DxButton class="btn btn-back-custom me-3" @Enabled="@cargando"  @onclick='() => Nav.NavigateTo("/menu_calculo_nomina")'>
-                <i class="bi bi-chevron-left"></i>
-            </DxButton>
-            <div class="text-start">
-                <h1 class="m-0">Cálculo de Nómina</h1>
-                <p class="text-muted m-0">Gestión y cálculo del periodo activo</p>
-            </div>
-        </div>
-    </header>
+
+    <FlechaRegresoMenu Titulo="Cálculo de Nómina" 
+                 Subtitulo="Gestión y cálculo del periodo activo"
+                   RutaRegresar="/menu_calculo_nomina"
+                   Cargando="cargando" />
 
     @if (cargando)
     {

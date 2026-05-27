@@ -2,26 +2,19 @@
 @page "/movimientos_imss"
 @using DevExpress.Blazor
 @using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
 @inherits VentanaBase
 @rendermode InteractiveServer
 <PageTitle>Movimientos Afiliatorios</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
 
-    @* ── Header ── *@
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
-                    title="Regresar">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Movimientos Afiliatorios</h1>
-                <p class="text-muted m-0">Historial y captura de movimientos para Imss/Infonavit</p>
-            </div>
-        </div>
-    </header>
+
+
+    <FlechaRegresoMenu Titulo="Movimientos Afiliatorios" 
+            Subtitulo="Historial y captura de movimientos para Imss/Infonavit"
+            RutaRegresar="/menu_catalogos"
+            Cargando="cargando" />
 
  
     @* ── Selector de Empleado ── *@

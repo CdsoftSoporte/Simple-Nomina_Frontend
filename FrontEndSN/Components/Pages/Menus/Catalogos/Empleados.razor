@@ -2,6 +2,7 @@
 @page "/empleados"
 @using DevExpress.Blazor
 @using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -11,25 +12,18 @@
 
 <div class="dashboard-container page-header-fade fade-in-all">
 
-    @* ── Header ── *@
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
-                    title="Regresar">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Empleados</h1>
-                <p class="text-muted m-0">Gestión del personal de la empresa</p>
-            </div>
-        </div>
-        <DxButton Text="Nuevo Empleado"
-                  Click="@(() => AbrirFormulario())"
-                  RenderStyle="ButtonRenderStyle.Primary"
-                  IconCssClass="bi bi-person-plus-fill"
-                  CssClass="shadow-sm" />
-    </header>
+
+    <FlechaRegresoMenu Titulo="Empleados" 
+        Subtitulo="Gestión del personal de la empresa"
+        RutaRegresar="/menu_catalogos"
+        Cargando="cargando" />
+        
+    <DxButton Text="Nuevo Empleado"
+        Click="@(() => AbrirFormulario())"
+        RenderStyle="ButtonRenderStyle.Primary"
+        IconCssClass="bi bi-person-plus-fill"
+        CssClass="shadow-sm" />
+
 
     @* ── Grid ── *@
     @if (cargando)

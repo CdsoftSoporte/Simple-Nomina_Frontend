@@ -1,6 +1,7 @@
 ﻿@attribute [Authorize]
 @page "/registros_patronales"
 @using DevExpress.Blazor
+@using FrontEndSN.Components.Reutilizables
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -8,24 +9,19 @@
 <PageTitle>Registros Patronales</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
-                    title="Regresar a Catálogos">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Registros Patronales</h1>
-                <p class="text-muted m-0">Configuración de registros patronales</p>
-            </div>
-        </div>
-        <DxButton Text="Nuevo Registro"
-                  Click="() => MostrarModal()"
-                  RenderStyle="ButtonRenderStyle.Primary"
-                  IconCssClass="bi bi-plus-circle-fill"
-                  CssClass="shadow-sm" />
-    </header>
+
+
+    <FlechaRegresoMenu Titulo="Registros Patronales" 
+        Subtitulo="Configuración de registros patronales"
+        RutaRegresar="/menu_catalogos"
+        Cargando="false" />
+     
+    <DxButton Text="Nuevo Registro"
+        Click="() => MostrarModal()"
+        RenderStyle="ButtonRenderStyle.Primary"
+        IconCssClass="bi bi-plus-circle-fill"
+        CssClass="shadow-sm" />
+
 
     <div class="card shadow-sm border-0 p-3 fade-in-all w-100">
         <DxGrid Data="@Lista"

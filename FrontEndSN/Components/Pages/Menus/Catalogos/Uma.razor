@@ -2,6 +2,7 @@
 @page "/Uma"
 @using DevExpress.Blazor
 @using CurrieTechnologies.Razor.SweetAlert2
+@using FrontEndSN.Components.Reutilizables
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -9,24 +10,17 @@
 <PageTitle>Unidad de Medida y Actualización</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_catalogos")'
-                    title="Regresar a Catálogos">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Unidad de Medida y Actualizacion</h1>
-                <p class="text-muted m-0">Histórico de importes vigentes</p>
-            </div>
-        </div>
+
+    <FlechaRegresoMenu Titulo="Unidad de Medida y Actualización (UMA)" 
+        Subtitulo="Histórico de importes vigentes"
+        RutaRegresar="/menu_catalogos"
+        Cargando="false" />
+
         <DxButton Text="Nueva UMA"
                   Click="() => MostrarModal()"
                   RenderStyle="ButtonRenderStyle.Primary"
                   IconCssClass="bi bi-plus-circle-fill"
                   CssClass="shadow-sm" />
-    </header>
 
     @* Tabla de Datos *@
     <div class="card shadow-sm border-0 p-3 fade-in-all" style="width:500px!important;">

@@ -1,6 +1,7 @@
 ﻿@attribute [Authorize]
 @page "/configuracion_empresa"
 @using DevExpress.Blazor
+@using FrontEndSN.Components.Reutilizables
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -8,19 +9,13 @@
 <PageTitle>Configuración de la empresa</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_configuracion")'
-                    title="Regresar">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Configuración de Empresa</h1>
-                <p class="text-muted m-0">Datos generales, dirección fiscal y configuración SAT/CFDI</p>
-            </div>
-        </div>
-    </header>
+
+
+    <FlechaRegresoMenu Titulo="Configuración de Empresa" 
+        Subtitulo="Datos generales, dirección fiscal y configuración SAT/CFDI"
+        RutaRegresar="/menu_configuracion"
+        Cargando="cargando" />
+
     @if (cargando)
     {
         <div class="d-flex justify-content-center align-items-center p-5">

@@ -1,0 +1,33 @@
+﻿@inject NavigationManager Nav
+
+<header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+        @if (!string.IsNullOrEmpty(RutaRegresar))
+        {
+            <DxButton class="btn btn-back-custom me-3" Visible="@(!Cargando)" @onclick="Regresar">
+                <i class="bi bi-chevron-left"></i>
+            </DxButton>
+        }
+        <div class="text-start">
+            <h1 class="m-0">@Titulo</h1>
+            <p class="text-muted m-0">@Subtitulo</p>
+        </div>
+    </div>
+</header>
+
+
+@code {
+    // Definimos los parámetros dinámicos
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    [Parameter] public string Subtitulo { get; set; } = string.Empty;
+    [Parameter] public string RutaRegresar { get; set; } = string.Empty;
+    [Parameter] public bool Cargando { get; set; } = false;
+
+    private void Regresar()
+    {
+        if (!string.IsNullOrEmpty(RutaRegresar))
+        {
+            Nav.NavigateTo(RutaRegresar);
+        }
+    }
+}

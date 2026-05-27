@@ -2,6 +2,7 @@
 @page "/departamentos"
 @using DevExpress.Blazor
 @using CurrieTechnologies.Razor.SweetAlert2
+@using FrontEndSN.Components.Reutilizables
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -9,20 +10,13 @@
 <PageTitle>Catálogo de Departamentos</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
-        <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-back-custom me-3"
-                        @onclick='() => Nav.NavigateTo("/menu_catalogos")'
-                        title="Regresar a Catálogos">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="text-start">
-                    <h1 class="m-0">Departamentos</h1>
-                    <p class="text-muted m-0"></p>
-                </div>
-            </div>
+        
 
-        </header>
+        <FlechaRegresoMenu Titulo="Departamentos" 
+        Subtitulo=""
+        RutaRegresar="/menu_catalogos"
+        Cargando="false" />
+
         <DxButton Text="Nuevo Departamento"
                   Click="() => MostrarModal()"
                   RenderStyle="ButtonRenderStyle.Primary"

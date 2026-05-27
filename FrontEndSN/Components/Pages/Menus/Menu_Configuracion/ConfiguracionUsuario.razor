@@ -1,5 +1,6 @@
 ﻿@attribute [Authorize]
 @page "/configuracion_usuario"
+@using FrontEndSN.Components.Reutilizables
 @using Microsoft.AspNetCore.Authorization
 @using System.IdentityModel.Tokens.Jwt
 @inject NavigationManager Nav
@@ -8,20 +9,11 @@
 <PageTitle>Configuración del usuario</PageTitle>
 
 <div class="dashboard-container page-header-fade fade-in-all">
-    <header class="dashboard-header d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex align-items-center">
-            <button class="btn btn-back-custom me-3"
-                    @onclick='() => Nav.NavigateTo("/menu_configuracion")'
-                    title="Regresar a Catálogos">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="text-start">
-                <h1 class="m-0">Configuración de tu usuario</h1>
-                <p class="text-muted m-0">Configura datos de tu cuenta de usuario</p>
-            </div>
-        </div>
-       
-    </header>
+
+    <FlechaRegresoMenu Titulo="Configuración de tu usuario" 
+        Subtitulo="Configura datos de tu cuenta de usuario"
+        RutaRegresar="/menu_configuracion"
+        Cargando="Cargando" />
 
 
     @if (Cargando)
