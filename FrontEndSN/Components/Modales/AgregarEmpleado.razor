@@ -1,0 +1,35 @@
+﻿@using FrontEndSN.Clases
+@inherits VentanaBase
+<DxWindow HeaderText="Agregar Empleado"
+          @bind-Visible="@IsVisible"
+          Width="600px"
+          ShowFooter="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          AllowResize="false">
+    <BodyTemplate>
+        @* Aquí adentro puedes meter tu formulario actual o llamar a tu otro componente *@
+
+        <div class="p-4 w-100">
+                <label class="form-label fw-bold small text-primary">Empleado:</label>
+                <DxComboBox Data="@ListaEmpleados"
+                            TextFieldName="NombreCompleto"
+                            ValueFieldName="Id"
+                            Value="@IdEmpleadoSeleccionado"
+                            ValueChanged="@((int id) => OnEmpleadoChanged(id))"
+                            SearchMode="@ListSearchMode.AutoSearch"
+                            NullText="Busque un empleado..."
+                            CssClass="w-80" />
+        </div>
+
+           
+
+    </BodyTemplate>
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Agregar al periodo" Enabled="@(IdEmpleadoSeleccionado>0)" RenderStyle="ButtonRenderStyle.Success" Click="@(() => Guardar(IdPeriodoSeleccionado))" IconCssClass="bi bi-person-plus-fill"  />
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="Cerrar" CssClass="me-2" />
+           
+        </div>
+    </FooterTextTemplate>
+</DxWindow>

@@ -26,7 +26,7 @@
     }
 
     .summary-card.card-red {
-        border-left-color: #dc3545 !important; /* Danger */
+        border-left-color: #c50f1f !important; /* Danger */
     }
 
     .summary-card.card-blue {

@@ -66,7 +66,6 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 		private void ToggleEmpleado(int IdEmpleado)
 		{
-			// Si ya está abierto, lo quita (lo cierra). Si no, lo agrega (lo abre).
 			if (empleadosExpandidos.Contains(IdEmpleado))
 			{
 				empleadosExpandidos.Remove(IdEmpleado);
@@ -159,12 +158,11 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 		protected async Task EjecutarCalculo()
 		{
-			// 1. Confirmación de seguridad
+
 			bool confirmado = await JS.InvokeAsync<bool>("notifier.confirm", "Calcular Nómina", "¿Estás seguro de calcular la nómina para este periodo? La información actual se sobreescribirá");
 
 			if (!confirmado) return;
 
-			// 2. Cargando... (puedes poner un spinner aquí)
 			cargando = true;
 			StateHasChanged();
 
@@ -180,7 +178,6 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			
 			try
 			{
-				// 3. Llamada al endpoint
 
 				if (response.IsSuccessStatusCode)
 				{
@@ -212,17 +209,15 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 		{
 			var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
 			if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
-			// 1. Llamada segura con Token
+
 			var request = new HttpRequestMessage(HttpMethod.Get, $"api/Excel/ListaDeRaya/{IdPeriodoSeleccionado}");
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
 			var response = await Http.SendAsync(request);
 			response.EnsureSuccessStatusCode();
 
-			// 2. Leer el contenido como string HTML
 			var htmlContent = await response.Content.ReadAsStringAsync();
 
-			// 3. Abrir ventana y escribir el contenido
 			await JS.InvokeVoidAsync("AbrirImpresion", htmlContent);
 		}
 

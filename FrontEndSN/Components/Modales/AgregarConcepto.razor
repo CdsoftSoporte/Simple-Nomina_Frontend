@@ -1,0 +1,41 @@
+﻿@using FrontEndSN.Clases
+@inherits VentanaBase
+<DxWindow HeaderText="@($"{TituloModal} {NombreEmp}")"
+          @bind-Visible="@IsVisible"
+          Width="600px"
+          ShowFooter="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          AllowResize="false">
+    <BodyTemplate>
+        @* Aquí adentro puedes meter tu formulario actual o llamar a tu otro componente *@
+
+        <div class="p-4 w-100">
+            <label class="form-label fw-bold small text-primary">Concepto:</label>
+            <DxComboBox Data="@ListaConceptos"
+                        TextFieldName="DescripcionConcepto"
+                        ValueFieldName="Id"
+                        Value="@IdConceptoSeleccionado"
+                        ValueChanged="@((int id) => OnConceptoChanged(id))"
+                        SearchMode="@ListSearchMode.AutoSearch"
+                        NullText="Busque un concepto..."
+                        Enabled="@(!IsEdicion)"
+                        CssClass="w-80" />
+            <label class="form-label fw-bold small text-primary">Importe:</label>
+            <DxSpinEdit @bind-Value="Importe"
+                        DisplayFormat="C2"
+                        Mask="@NumericMask.Currency"
+                         />
+        </div>
+
+
+
+    </BodyTemplate>
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Agregar al periodo" Enabled="@(IdConceptoSeleccionado > 0 && Importe>=0.01M)" RenderStyle="ButtonRenderStyle.Success" Click="@(() => Guardar())" IconCssClass="bi bi-plus-circle-dotted" />
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="Cerrar" CssClass="me-2" />
+
+        </div>
+    </FooterTextTemplate>
+</DxWindow>

@@ -1,14 +1,222 @@
 ﻿@page "/periodos_manuales"
 @using FrontEndSN.Clases
 @using FrontEndSN.Components.Reutilizables
+@using FrontEndSN.Components.Modales
 @inherits VentanaBase
 
 <div class="dashboard-container page-header-fade fade-in-all">
 
-    <FlechaRegresoMenu Titulo="Periodos Manuales" 
-        Subtitulo="Modificación manual de periodos"
-        RutaRegresar="/menu_calculo_nomina"
-        Cargando="cargando" />
+    <FlechaRegresoMenu Titulo="Periodos Manuales"
+                       Subtitulo="Captura y edita totalmente un periodo de nomina"
+                       RutaRegresar="/menu_calculo_nomina"
+                       Cargando="cargando" />
 
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
 
+        @* --- BARRA SUPERIOR FORZADA A HORIZONTAL --- *@
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            @* Usamos Flexbox directo en el style para que no se apile *@
+            <div class="card-body" style="display: flex; flex-direction: row; justify-content:space-between; align-items: center; flex-wrap: wrap; gap: 0.1rem;">
+
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 0.4rem; height:60px;">
+                    <i class="bi bi-calendar3 text-muted fs-5" style="padding-left:10px;"></i>
+                    <span class="fw-semibold" style="white-space: nowrap;">Nomina:</span>
+                    <div style="width: 250px;">
+                        <DxComboBox Data="@ListaNominas" TextFieldName="Descripcion" ValueFieldName="Id" Value="IdNominaSeleccionada"
+                                    SearchMode="ListSearchMode.AutoSearch" ValueChanged="(int newValue) => OnNominaChanged(newValue)"
+                                    NullText="Seleccione una nómina"/>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 0.4rem; height:60px;">
+                    <i class="bi bi-calendar3 text-muted fs-5" style="padding-left:10px;"></i>
+                    <span class="fw-semibold" style="white-space: nowrap;">Periodo:</span>
+                    <div class="" style="width: 350px;">
+                        <DxComboBox Data="@ListaPeriodos" Enabled="@(IdNominaSeleccionada > 0)" ValueFieldName="id" TextFieldName="Descripcion" Value="@IdPeriodoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch" ValueChanged="(int newValue) => OnPeriodoChanged(newValue)"
+                                    NullText="@(IdNominaSeleccionada > 0 ? "Seleccione Periodo" : "Seleccione una nómina primero")" />
+                    </div>
+                    <div style=" width:100%;display: flex; flex-direction: row;justify-content:center;align-items:center; gap: 0.5rem;padding-top:8px;padding-bottom:5px;">
+                        <DxButton Enabled="@(IdPeriodoSeleccionado > 0)" Text="Lista de Raya" IconCssClass="bi bi-list-check" RenderStyle="ButtonRenderStyle.Success" Click="ImprimirListaDeRaya" />
+                        <DxButton Enabled="@(IdPeriodoSeleccionado > 0)" Text="Reporte Analítico" IconCssClass="bi bi-file-earmark-bar-graph" @onclick="ExportarAnaliticoDeNomina" CssClass="@(IdPeriodoSeleccionado > 0 ? "btn-purple" : "")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* --- TARJETAS DE RESUMEN FORZADAS A HORIZONTAL --- *@
+        <div style="display: flex; flex-direction: row; gap: 1.5rem; margin-bottom: 1.5rem; margin-top:1.5rem;">
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-green tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted fs-5 texto-titulos-resumen">Total Percepciones</small>
+                    <h3 style="color:#00A63E;" class="text-success fw-bold mb-0 mt-1 texto-titulos-resumen fade-in-all">$@TotalPercepciones.ToString("N2")</h3>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-red tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted texto-titulos-resumen">Total Deducciones</small>
+                    <h3 style="color:#C50F1F" class="text-danger fw-bold mb-0 mt-1 texto-titulos-resumen fade-in-all">$@TotalDeducciones.ToString("N2")</h3>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-blue tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted texto-titulos-resumen">Neto Total a Pagar</small>
+                    <h3 style="color:#155DFC;" class="text-primary fw-bold mb-0 mt-1 texto-titulos-resumen fade-in-all">$@TotalNeto.ToString("N2")</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="display: flex; flex-direction: row; justify-content:space-between; align-items: center; flex-wrap: wrap; max-height:80px;">
+            <h5 class="fw-bold mb-3">Empleados (@PeriodoConceptos.Count)</h5>
+   
+            <DxButton Text="Agregar Empleado" Enabled="@(IdPeriodoSeleccionado>0)" IconCssClass="bi bi-person-plus-fill" RenderStyle="ButtonRenderStyle.Success" @onclick="AbrirModalEmpleado" />
+                
+         
+        </div>
+        
+        @foreach (var empleado in PeriodoConceptos)
+        {
+            <div class="card shadow-sm rounded-3 mb-2 employee-card tarjeta-flotante fade-in-all">
+
+                <div class="card-body cursor-pointer" @onclick="() => ToggleEmpleado(empleado.IdEmpleado)" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+
+                    <div style="display: flex; flex-direction: row; align-items: center; gap: 1rem;padding-left:10px;">
+                        <div class="avatar-circle" style="flex-shrink: 0;">
+                           
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                            <h6 class="fw-bold mb-0">@empleado.NombreCompleto</h6>
+                            <small class="text-muted">@empleado.puesto - @empleado.departamento</small>
+                        </div>
+                        <div @onclick:stopPropagation="true" style="padding-bottom:20px;">
+                            <DxButton Text="" IconCssClass="bi bi-person-fill-dash" RenderStyle="ButtonRenderStyle.Danger" Click="@(() => ConfirmarEliminarEmpleado(empleado))" />
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: row; align-items: center; gap: 1.5rem;">
+                        <div class="text-end">
+                            <small class="text-muted d-block m-1" style="font-size: 0.8rem;">Neto a Pagar</small>
+                            <span class="text-primary fw-bold fs-5">$@empleado.netoAPagar</span>
+                        </div>
+                        <i class="bi @(empleadoExpandido ? "bi-chevron-up" : "bi-chevron-down") text-muted fs-5" style="padding-right:10px;"></i>
+                    </div>
+
+                </div>
+
+                <div class="expandable-content @(empleadosExpandidos.Contains(empleado.IdEmpleado) ? "is-expanded" : "")">
+                    <div class="expandable-inner">
+                        <div class="card-footer border-top-2 p-4 pt-0" style="background-color: transparent;">
+                            <div style="display: flex; flex-direction: row; gap: 1.5rem;">
+                                @* Columna Unidades *@
+                                <div class="detail-box box-yellow p-3 tarjeta-flotante" style="flex: 1; min-width: 200px; background-color:#FEF9C3;">
+
+                                    <button class="boton-agrega-concepto bi bi-plus-square-fill"  @onclick="@(()=>AbrirModalConcepto(empleado.IdEmpleado,empleado.NombreCompleto))"> Unidades</button>/>
+                                    
+                                    @foreach (var concepto in empleado.Conceptos.Where(c => c.tipo == 'U'))
+                                    {
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="color: #CA8A04; font-size: 0.875rem;">@concepto.descripcion</span>
+
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                                                <i class="bi bi-pencil-square cursor-pointer" style="color: #CA8A04; font-size: 1rem;" title="Editar" @onclick="@(() => AbrirModalConcepto(empleado.IdEmpleado,concepto.id,concepto.importe,empleado.NombreCompleto))"></i>
+                                                <i class="bi bi-trash text-danger cursor-pointer" style="font-size: 1rem;" title="Eliminar" @onclick="@(() => ConfirmarEliminarConcepto(empleado.IdEmpleado, concepto.id))"></i>
+                                                <span class="fw-semibold" style="width:60px;text-align:right;font-size: 0.875rem; color: #CA8A04;">@concepto.importe.ToString("N2")</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                @* Columna Percepciones *@
+                                <div class="detail-box box-green p-3 tarjeta-flotante" style="flex:1;min-width:0;background-color:#F0FDF4;display:flex; flex-direction:column;">
+
+                                    <button class="boton-agrega-concepto bi bi-plus-square-fill" style="color:#198754 !important;" @onclick="@(() => AbrirModalConcepto(empleado.IdEmpleado,empleado.NombreCompleto))"> Percepciones</button>/>
+
+                                    @foreach (var concepto in empleado.Conceptos.Where(c => c.tipo == 'P'))
+                                    {
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                                            <span style="color:#198754; font-size:0.875rem;">
+                                                @concepto.descripcion
+                                            </span>
+
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                                                <i class="bi bi-pencil-square cursor-pointer" style="color: #198754; font-size: 1rem;" title="Editar" @onclick="@(() => AbrirModalConcepto(empleado.IdEmpleado, concepto.id, concepto.importe,empleado.NombreCompleto))"></i>
+                                                <i class="bi bi-trash text-danger cursor-pointer" style="font-size: 1rem;" title="Eliminar" @onclick="@(() =>ConfirmarEliminarConcepto(empleado.IdEmpleado,concepto.id))"></i>
+                                                <span class="text-success fw-semibold" style="width:60px;font-size:0.875rem; color:#198754;text-align:right;">$@concepto.importe</span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div style="margin-top:auto;">
+
+                                        <hr class="text-success border-success opacity-25">
+
+                                        <div style="display:flex; justify-content:space-between; color:#198754; align-items:center;">
+
+                                            <span class="fw-bold text-success texto-totales">Total </span>
+
+                                            <span class="fw-bold text-success texto-totales"> $@empleado.totalPercepciones</span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="detail-box box-red p-3 tarjeta-flotante" style=" flex:1; min-width:0; background-color:#FEF2F2; display:flex; flex-direction:column;">
+
+                                    <button class="boton-agrega-concepto bi bi-plus-square-fill" style="color:#dc3545 !important;" @onclick="@(() => AbrirModalConcepto(empleado.IdEmpleado,empleado.NombreCompleto))"> Deducciones</button>/>
+                                    @foreach (var concepto in empleado.Conceptos.Where(c => c.tipo == 'D'))
+                                    {   @* Columna Deducciones *@
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                                            <span style="color:#dc3545; font-size:0.875rem;">
+                                                @concepto.descripcion
+                                            </span>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                                                <i class="bi bi-pencil-square cursor-pointer" style="color: #dc3545; font-size: 1rem;" title="Editar" @onclick="@(() => AbrirModalConcepto(empleado.IdEmpleado, concepto.id, concepto.importe,empleado.NombreCompleto))"></i>
+                                                <i class="bi bi-trash text-danger cursor-pointer" style="font-size: 1rem;" title="Eliminar" @onclick="@(() => ConfirmarEliminarConcepto(empleado.IdEmpleado, concepto.id))"></i>
+                                            <span class="text-success fw-semibold" style="width:60px;text-align:right;font-size:0.875rem; color:#dc3545;">$@concepto.importe</span>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div style="margin-top:auto;">
+
+                                        <hr class="text-success border-success opacity-25">
+
+                                        <div style="display:flex; justify-content:space-between; color:#dc3545; align-items:center;">
+                                            <span class="fw-bold text-success texto-totales">Total</span>
+                                            <span class="fw-bold text-success texto-totales">$@empleado.totalDeducciones</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            @* Pie con el Neto *@
+                            <div class="total-box box-blue mt-5 p-5 rounded-3 tarjeta-flotante" style="background-color: #EFF6FF;display: flex; flex-direction: row; justify-content: space-between; align-items: center; color:#155DFC;border-radius:5px; height:50px;">
+                                <span class="fw-bold texto-totales">Neto a Pagar</span>
+                                <span class="fw-bold texto-totales">$@empleado.netoAPagar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
 </div>
+
+
+<AgregarEmpleado @ref="ModalEmpleado" OnEmpleadoAgregado="CargaConceptosYEmpleados" />
+<AgregarConcepto @ref="ModalConcepto" OnConceptoAgregado="CargaConceptosYEmpleados" />
