@@ -102,7 +102,7 @@
 
 <DxWindow @bind-Visible="@mostrarFormulario"
           HeaderText="@(Modelo.Id == 0 ? "Nuevo Empleado" : $"Editar a empleado: {Modelo.Paterno} {Modelo.Materno} {Modelo.Nombre}")"
-          Width="650px"
+          Width="700px"
           MaxWidth="95%"
           Height="650px"
           Modal="true"
@@ -123,7 +123,7 @@
 
                 <DxTabs>
                     @* ── Tab 1: Datos Personales ── *@
-                    <DxTabPage Text="Datos Personales">
+                    <DxTabPage TabIconCssClass="bi bi-person-fill" Text="Datos Personales">
                         <div class="row g-3 mt-2">
 
                             <div class="col-md-4">
@@ -188,7 +188,7 @@
                     </DxTabPage>
 
                     @* ── Tab 2: Dirección ── *@
-                    <DxTabPage Text="Dirección">
+                    <DxTabPage TabIconCssClass="bi bi-geo-alt me-2" Text="Dirección">
                         <div class="row g-3 mt-2">
 
                             <div class="col-md-6">
@@ -219,7 +219,7 @@
                     </DxTabPage>
 
                     @* ── Tab 3: Datos Laborales ── *@
-                    <DxTabPage Text="Datos Laborales" >
+                    <DxTabPage TabIconCssClass="bi bi-tools" Text="Datos Laborales" >
                         <div class="row g-3 mt-2">
                             
                             <div class="col-md-6">
@@ -280,7 +280,7 @@
                     </DxTabPage>
 
                     @* ── Tab 4: Contacto y Banco ── *@
-                    <DxTabPage Text="Contacto y Banco" >
+                    <DxTabPage TabIconCssClass="bi bi-bank" Text="Contacto y Banco">
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Teléfono:</label>

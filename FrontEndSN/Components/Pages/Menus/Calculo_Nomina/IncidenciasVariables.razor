@@ -10,7 +10,7 @@
 
 <div class="dashboard-container page-header-fade fade-in-all">
 
-        <FlechaRegresoMenu Titulo="Incidencias Variables" 
+    <FlechaRegresoMenu Titulo="Incidencias Variables" 
         Subtitulo="Captura de Incidencias Variables en periodos de nómina"
         RutaRegresar="/menu_calculo_nomina"
         Cargando="false" />
@@ -128,10 +128,9 @@
           
     <BodyTextTemplate>
         <div class="p-4 w-100">
-        <EditForm EditContext="@ContextoFormulario" OnValidSubmit="AgregarIncidencia" Context="formContext">
-            <DataAnnotationsValidator />
-
-           
+            <EditForm EditContext="@ContextoFormulario" OnValidSubmit="AgregarIncidencia" Context="formContext">
+                <DataAnnotationsValidator />
+            
                 @* Empleado *@
                 <div class="col-12">
                     <label class="form-label fw-bold">Empleado <span class="text-danger">*</span></label>
@@ -165,7 +164,7 @@
                     <label class="form-label fw-bold">Fecha <span class="text-danger">*</span></label>
                     <DxDateEdit @bind-Date="Modelo.Fecha"
                                 CssClass="w-100" />
-                    <ValidationMessage For="@(() => Modelo.Fecha)" class="text-danger small" />
+                        <ValidationMessage For="@(() => Modelo.Fecha)" class="text-danger small" />
                 </div>
 
                 @* Importe *@
@@ -189,7 +188,7 @@
                     </div>
                 }
      
-        </EditForm>
+            </EditForm>
         </div>
     </BodyTextTemplate>
     <FooterTextTemplate>

@@ -1,5 +1,16 @@
-﻿.main-footer {
+﻿/*.main-footer {
     background:rgb(37,37,37,0.8);
+    backdrop-filter: blur(10px);*/ /* Efecto de desenfoque tipo cristal */
+    /*border-top: 5px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 2.5rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}*/
+
+.main-footer {
+    background-color: var(--var-bg-primary);
     backdrop-filter: blur(10px); /* Efecto de desenfoque tipo cristal */
     border-top: 5px solid rgba(0, 0, 0, 0.05);
     padding: 1rem 2.5rem;

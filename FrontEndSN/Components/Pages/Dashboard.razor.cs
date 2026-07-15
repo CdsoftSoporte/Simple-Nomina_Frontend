@@ -47,8 +47,8 @@ namespace FrontEndSN.Components.Pages
 		private List<Modulo> modulos = new List<Modulo>
 		{
 			new Modulo { Titulo = "Catálogos", Descripcion = "Gestión de catálogos generales como empleados,turnos, puestos, etc.", Icono = "oi oi-list", Ruta = "/menu_catalogos" },			
-			new Modulo { Titulo = "Cálculo", Descripcion = "Administración de periodos, cálculo, monitoreo, etc.", Icono = "oi oi-calculator", Ruta = "/menu_calculo_nomina" },
-			new Modulo { Titulo = "Timbrado", Descripcion = "Timbrar periodos de nómina.", Icono = "oi oi-globe", Ruta = "/logout" },
+			new Modulo { Titulo = "Cálculo", Descripcion = "Administración de nóminas, periodos, cálculo, monitoreo, etc.", Icono = "oi oi-calculator", Ruta = "/menu_calculo_nomina" },
+			new Modulo { Titulo = "Timbrado", Descripcion = "Timbrar periodos de nómina.", Icono = "oi oi-globe", Ruta = "/menu_timbrado" },
 			new Modulo { Titulo = "Configuración", Descripcion = "Ajustes de la empresa y usuario.", Icono = "oi oi-cog", Ruta = "/menu_configuracion" },
 			new Modulo { Titulo = "Selecciona Empresa", Descripcion = "Cambiar la empresa en la que se está trabajando.", Icono = "oi oi-hard-drive", Ruta = "/selecciona_empresa" },
 			new Modulo { Titulo = "Cerrar Sesión", Descripcion = "Salir de forma segura del sistema.", Icono = "oi oi-account-logout", Ruta = "/logout" }

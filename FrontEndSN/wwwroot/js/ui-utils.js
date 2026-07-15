@@ -43,10 +43,10 @@
         });
         return result.isConfirmed;
     }
-}; // Aquí termina correctamente el objeto notifier
+}; 
 
-// LA FUNCIÓN DE EXCEL VA AFUERA, COMO UNA FUNCIÓN GLOBAL INDEPENDIENTE
-window.DescargarExcel = async (contentStreamReference, nombre) => {
+
+window.DescargarArchivos = async (contentStreamReference, nombre) => {
     const arrayBuffer = await contentStreamReference.arrayBuffer();
     const blob = new Blob([arrayBuffer]);
     const url = URL.createObjectURL(blob);

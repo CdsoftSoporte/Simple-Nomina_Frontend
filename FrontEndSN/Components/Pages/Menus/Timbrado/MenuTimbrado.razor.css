@@ -1,0 +1,121 @@
+﻿
+.dashboard-container {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.2rem;
+}
+
+/*.card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;*/
+/* Asegúrate de que el transform esté incluido en la transición */
+/*transition: transform 0.45s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+    .card:hover {
+        transform: translateY(-5px)!important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        border-color: var(--blazor-load-border-color, #052c65);
+    }*/
+
+/* Tarjeta Estilizada */
+.card {
+    background-color: var(--bs-body-bg, #ffffff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+    .card:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        /* El borde cambia según el color primario del tema */
+        border-color: var(--blazor-load-border-color, #052c65);
+    }
+
+
+
+.card-icon {
+    font-size: 2.2rem;
+    margin-right: 1.2rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.card-content p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+/* Animaciones */
+.catalog-item {
+    opacity: 0;
+    animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.btn-back-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 20%;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #6c757d; /* Color gris suave por defecto */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 0;
+}
+
+    .btn-back-custom:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd; /* Cambia al azul primario */
+        transform: translateX(-3px); /* Pequeño brinco a la izquierda */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-color: #0d6efd;
+    }
+
+    .btn-back-custom i {
+        line-height: 0;
+        font-size: 1.5rem;
+    }

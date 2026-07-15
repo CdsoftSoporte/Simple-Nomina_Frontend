@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FrontEndSN.Components.Pages.Menus.Catalogos
 {
@@ -274,7 +275,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					descripcion = "",
 					tipo = 'Q',
 					activo = 'S',
-					ejercicio = DateTime.Now.Year.ToString()
+					ejercicio = DateTime.Now.Year.ToString(),
+					SerieTimbrado = ""
 				};
 				ejercicioInt = DateTime.Now.Year;
 			}
@@ -287,7 +289,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					id_patron = item.id_patron,
 					tipo = item.tipo,
 					activo = item.activo,
-					ejercicio = item.ejercicio
+					ejercicio = item.ejercicio,
+					SerieTimbrado=item.SerieTimbrado
 				};
 				ejercicioInt = int.TryParse(item.ejercicio, out int anio) ? anio : DateTime.Now.Year;
 			}
@@ -418,6 +421,11 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			public string ejercicio { get; set; } = DateTime.Now.Year.ToString();
 			public DateTime? fecha_creacion { get; set; }
 			public DateTime? fecha_actualizacion { get; set; }
+
+			[JsonPropertyName("serie_timbrado")]
+			[StringLength(25, ErrorMessage = "Máximo 25 caracteres")]
+			public string? SerieTimbrado { get; set; }
+
 		}
 
 		public class RegistroPatronalModel

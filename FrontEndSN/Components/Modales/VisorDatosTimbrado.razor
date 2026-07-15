@@ -1,0 +1,86 @@
+﻿@using FrontEndSN.Clases
+@inherits VentanaBase
+<DxWindow @bind-Visible="@IsVisible"
+          HeaderCssClass="align-items-center w-100"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          ShowFooter="true"
+          Width="650px"
+          
+          Minheight="500px">
+    <HeaderContentTemplate>
+        <div class="d-flex flex-column py-1 flex-grow-1">
+            @* Texto principal: Nombre del empleado grande y en negrita *@
+            <span style="font-size: 1.25rem; font-weight: 700; line-height: 1.2;">
+                @DatosEmpleado?.NombreEmpleado
+            </span>
+
+            @* Texto secundario: Puesto o información adicional más pequeña *@
+            <span class="text-muted" style="font-size: 0.85rem; font-weight: 400; margin-top: 4px;">
+                @DatosEmpleado?.NombrePuesto &mdash; @DatosEmpleado?.NombreDepartamento
+            </span>
+        </div>
+    </HeaderContentTemplate>
+    <BodyContentTemplate>
+        <DxTabs CssClass="custom-tabs mt-2 mb-4">
+            <DxTabPage TabIconCssClass="bi bi-check-circle-fill" Text="Resumen">
+                @if (DatosEmpleado != null)
+                {
+                    @* Encabezado de Estado *@
+                    <div class="alert alert-primary d-flex align-items-center" role="alert">
+                       
+                        <div>
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CFDI TIMBRADO</strong>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6"><strong>UUID:</strong><br />@DatosEmpleado?.UUID</div>
+                        <div class="col-6"><strong>No. Certificado SAT:</strong><br />@DatosEmpleado?.CertificadoSat</div>
+                        <div class="col-6 mt-2"><strong>Fecha de timbrado:</strong><br />@DatosEmpleado?.FechaTimbrado.ToString("dd MMM yyyy, HH:mm")</div>
+                    </div>
+
+                    @* QR y Cadenas *@
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            @if (DatosEmpleado?.QrTimbre != null)
+                            {
+                                <img src="data:image/png;base64,@Convert.ToBase64String(DatosEmpleado?.QrTimbre)" width="120" />
+                            }
+                        </div>
+                        <div class="col-8">
+                            <label><strong>Sello CFDI:</strong></label>
+                            <div class="bg-light p-1 mb-2" style="font-size: 0.75rem; word-break: break-all;">@DatosEmpleado?.SelloDigital</div>
+
+                            <label><strong>Cadena original:</strong></label>
+                            <div class="bg-light p-1" style="font-size: 0.75rem; word-break: break-all;">@DatosEmpleado?.CadenaOriginal</div>
+                        </div>
+                    </div>
+                }
+            </DxTabPage>
+
+            <DxTabPage TabIconCssClass="bi bi-filetype-xml" Text="XML">
+                @* Usamos w-100 para aprovechar el ancho de la pestaña *@
+                <div class="w-100 p-2">
+
+                    @* CONTENEDOR CON SCROLL *@
+                    <div class="rounded-3 border p-3" style="border-radius:5px;max-height: 500px; overflow-y: auto; overflow-x:auto; background-color: rgba(16,24,40,0.3);">
+
+                        @* ETIQUETA PRE PARA RESPETAR EL FORMATO DEL XML *@
+                        <pre class="mb-0 text-dark" style="padding:0px 5px 0px 5px;font-family: monospace; font-size: 0.85rem; white-space: pre-wrap;word-break:break-word;">@DatosEmpleado.XmlFirmado</pre>
+
+                    </div>
+
+                </div>
+            </DxTabPage>
+
+        </DxTabs>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="d-flex gap-2">
+            <DxButton Text="Generar Recibo PDF" IconCssClass="bi bi-filetype-pdf" Click="GenerarPDFReciboNomina" />
+        <DxButton Text="Descargar XML" IconCssClass="bi bi-file-earmark-arrow-down" CssClass="btn-primary" Click="DescargarXML" />
+        </div>
+    </FooterContentTemplate>
+</DxWindow> 

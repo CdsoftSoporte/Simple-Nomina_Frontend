@@ -24,6 +24,12 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 		private bool cargando = true;
 
+		private List<dynamic> TipoEmpresaOpciones = new()
+		{
+			new { Valor = 'F', Texto = "Física" },
+			new { Valor = 'M', Texto = "Moral"  }
+		};
+
 		protected override async Task OnInitializedAsync()
 		{
 			editContext = new EditContext(Modelo);
@@ -242,6 +248,22 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 			[JsonPropertyName("folio_actual")]
 			public int? FolioActual { get; set; } = 1;
+
+			[JsonPropertyName("timbrado_prueba")]
+			public char TimbradoPrueba { get; set; }
+
+			[JsonPropertyName("correo")]
+			public string Correo { get; set; }
+
+			[JsonPropertyName("tipo_empresa")]
+			public char TipoEmpresa { get; set; }
+
+			[JsonIgnore]
+			public bool TimbradoPruebaBool
+			{
+				get => TimbradoPrueba == 'S';
+				set => TimbradoPrueba = value ? 'S' : 'N';
+			}
 		}
 	}
 }

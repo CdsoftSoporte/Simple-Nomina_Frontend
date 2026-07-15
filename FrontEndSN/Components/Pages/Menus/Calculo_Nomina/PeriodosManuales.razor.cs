@@ -98,7 +98,7 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 			using var streamRef = new DotNetStreamReference(stream: fileStream);
 
-			await JS.InvokeVoidAsync("DescargarExcel", streamRef, "Analitico.xlsx");
+			await JS.InvokeVoidAsync("DescargarArchivos", streamRef, "Analitico.xlsx");
 		}
 
 		protected async Task CargaConceptosYEmpleados()

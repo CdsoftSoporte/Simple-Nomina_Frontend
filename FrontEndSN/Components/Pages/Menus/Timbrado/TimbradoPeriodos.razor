@@ -1,0 +1,363 @@
+﻿@attribute [Authorize]
+@page "/timbrado_periodos"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
+@using FrontEndSN.Components.Modales
+@inherits VentanaBase;
+<PageTitle>Timbrar Períodos de Nómina</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    <FlechaRegresoMenu Titulo="Timbrado de periodos"
+                       Subtitulo="Timbrar periodos de nómina"
+                       RutaRegresar="/menu_timbrado"
+                       Cargando="cargando" />
+
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+
+        @* --- BARRA SUPERIOR FORZADA A HORIZONTAL --- *@
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            @* Usamos Flexbox directo en el style para que no se apile *@
+            <div class="card-body" style="display: flex; flex-direction: row; justify-content:space-between; align-items: center; flex-wrap: wrap; gap: 0.1rem;">
+
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 0.4rem; height:60px;">
+                    <i class="bi bi-calendar3 text-muted fs-5" style="padding-left:10px;"></i>
+                    <span class="fw-semibold" style="white-space: nowrap;">Nomina:</span>
+                    <div style="width: 400px;">
+                        <DxComboBox Data="@ListaNominas" TextFieldName="Descripcion" ValueFieldName="Id" Value="IdNominaSeleccionada"
+                                    SearchMode="ListSearchMode.AutoSearch" ValueChanged="(int newValue) => OnNominaChanged(newValue)"
+                                    NullText="Seleccione una nómina" />
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 0.4rem; height:60px;">
+                    <i class="bi bi-calendar3 text-muted fs-5" style="padding-left:10px;"></i>
+                    <span class="fw-semibold" style="white-space: nowrap;">Periodo:</span>
+                    <div class="" style="width: 400px;">
+                        <DxComboBox Data="@ListaPeriodos" Enabled="@(IdNominaSeleccionada > 0)" ValueFieldName="id" TextFieldName="Descripcion" Value="@IdPeriodoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch" ValueChanged="(int newValue) => OnPeriodoChanged(newValue)"
+                                    NullText="@(IdNominaSeleccionada > 0 ? "Seleccione Periodo" : "Seleccione una nómina primero")" />
+                    </div>
+                   
+                </div>
+                <div style=" width:100%;display: flex; flex-direction: row;justify-content:end;align-items:center; gap: 0.5rem;padding-top:8px;padding-bottom:5px;">
+                    <DxButton Enabled="@(IdPeriodoSeleccionado > 0)" Text="Datos de timbrado" IconCssClass="bi bi-file-earmark-bar-graph" RenderStyle="ButtonRenderStyle.Success" Click="ExportarAnaliticoDeNomina" />
+
+                </div>
+            </div>
+        </div>
+
+        @* --- TARJETAS DE RESUMEN FORZADAS A HORIZONTAL --- *@
+        <div style="display: flex; flex-direction: row; gap: 1.5rem; margin-bottom: 1.5rem; margin-top:1.5rem;max-height:70px;">
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-blue tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted texto-titulos-resumen">Total de empleados en periodo</small>
+                    <h3 style="color:#155DFC;margin:0;" class="text-primary fw-bold texto-titulos-resumen fade-in-all">@TotalEmpleados</h3>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-green tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted fs-5 texto-titulos-resumen">Timbrados</small>
+                    <h3 style="color:#00A63E; margin:0;" class="text-success fw-bold mb-0 mt-1 texto-titulos-resumen fade-in-all">@TotalEmpleadosTimbrados</h3>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3 summary-card card-yellow tarjeta-flotante" style="flex: 1; min-width: 0;">
+                <div class="card-body">
+                    <small class="text-muted texto-titulos-resumen">Pendientes de timbrar</small>
+                    <h3 style="color:#FDC905; margin:0;" class="text-danger fw-bold mb-0 mt-1 texto-titulos-resumen fade-in-all">@TotalEmpleadosPendientes</h3>
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+        <DxTabs CssClass="custom-tabs mt-2 mb-4">
+          
+            <DxTabPage TabIconCssClass="bi bi-clock" Text="Por timbrar">
+                <div style="padding-left:12px;padding-top:5px;">
+                    <br />
+                    <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+
+                        <div style="display:flex;flex-direction:row;justify-content:space-between">
+                            <div class="card-body" style="display: flex; flex-direction: row; justify-content:start; align-items:center;">
+                                <DxButton style="text-decoration:underline;" Click="SeleccionarTodos" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Todos"></DxButton>
+                                <DxButton style="text-decoration:underline;" Click="SeleccionarNinguno" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Ninguno"></DxButton>
+                                <p>
+                                    @(SeleccionadosPorTimbrar?.Count ?? 0) seleccionado(s)
+                                </p>
+                            </div>
+
+                            <div style="display:flex;align-items:center">
+                                <DxButton Enabled="@(IdPeriodoSeleccionado > 0 & SeleccionadosPorTimbrar.Count > 0)"
+                                      Text="@($"Timbrar Seleccionados ({SeleccionadosPorTimbrar?.Count ?? 0})")" IconCssClass="bi bi-upload"
+                                      @onclick="TimbrarSeleccionados" RenderStyle="ButtonRenderStyle.Primary"/>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+
+                    @* Grid Pendientes de timbrado *@
+                    <DxGrid @ref="GridPendientes"
+                            Data="@Empleados.Where(e=>e.Estado=="Pendiente")"
+                            @bind-SelectedDataItems="SeleccionadosPorTimbrar"
+                            ShowFooter="true"
+                            SelectionMode="GridSelectionMode.Multiple"
+                            AllowSelectRowByClick="false"
+                            PageSize="7"
+                            CssClass="tabla-moderna-nomina shadow-sm border-0">
+
+                        <Columns>
+                            @* Columna de Checkbox *@
+                            <DxGridSelectionColumn Width="50px" />
+
+                            @* Columna Empleado *@
+                            <DxGridDataColumn FieldName="Nombre" Caption="EMPLEADO" MinWidth="250">
+                                <CellDisplayTemplate>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-semibold text-dark" style="font-size: 0.95rem;">@(((EmpleadoTimbrado)context.DataItem).Nombre)</span>
+                                        <small class="text-muted" style="font-size: 0.8rem;">@(((EmpleadoTimbrado)context.DataItem).Puesto)</small>
+                                    </div>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="Departamento" Caption="DEPARTAMENTO" />
+
+                            <DxGridDataColumn FieldName="Percepciones" Caption="PERCEPCIONES" TextAlignment="GridTextAlignment.Right">
+                                <CellDisplayTemplate>
+                                    <span style="color: #10b981; font-weight: 500;">@(((EmpleadoTimbrado)context.DataItem).Percepciones.ToString("C2"))</span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="Deducciones" Caption="DEDUCCIONES" TextAlignment="GridTextAlignment.Right">
+                                <CellDisplayTemplate>
+                                    <span style="color: #ef4444; font-weight: 500;">@(((EmpleadoTimbrado)context.DataItem).Deducciones.ToString("C2"))</span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="Neto" Caption="NETO" TextAlignment="GridTextAlignment.Right">
+                                <CellDisplayTemplate>
+                                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">@(((EmpleadoTimbrado)context.DataItem).Neto.ToString("C2"))</span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="Estado" Caption="ESTADO" TextAlignment="GridTextAlignment.Center" Width="120px">
+                                <CellDisplayTemplate>
+                                    <span class="badge rounded-pill text-secondary fw-normal" padding: 0.5em 1em;">
+                                        @(((EmpleadoTimbrado)context.DataItem).Estado)
+                                    </span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                        </Columns>
+
+                        <EmptyDataAreaTemplate>
+                            <div class="empty-grid-container">
+                                <div class="empty-icon-wrapper">
+                                    <i class="bi bi-card-heading"></i>
+                                </div>
+                                <h4>Sin empleados disponibles para timbrar</h4>
+                            </div>
+                        </EmptyDataAreaTemplate>
+
+                        <DetailRowTemplate>
+                            @{
+                                var empleado = (EmpleadoTimbrado)context.DataItem;
+                            }
+                            <div class="p-4 w-100" style="box-sizing: border-box;">
+
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%;">
+
+                                    @* TARJETA PERCEPCIONES (Izquierda) *@
+                                    <div>
+                                        <div class="card border-0 shadow-sm rounded-3 tarjeta-apartada" style=" height: 100%;">
+
+                                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 1.1rem;">
+                                                <hr style="flex: 1; border-top: 1px solid #dee2e6; margin-right: 10px;">
+                                                <span>Percepciones</span>
+                                                <hr style="flex: 1; border-top: 1px solid #dee2e6; margin-left: 10px;">
+                                            </div>
+                                            @foreach (var p in empleado.DesglosePercepciones)
+                                            {
+                                                @* Usamos grid con 2 columnas: la primera toma todo el espacio y la segunda un ancho fijo *@
+                                                <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 0.5rem; gap: 10px;">
+
+                                                    <span class="text-dark" style="font-size: 0.9rem;padding-left:5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                        @p.Descripcion
+                                                    </span>
+
+                                                    <span style="color: #10b981; font-weight: 500; font-size: 0.9rem; text-align: right; min-width: 90px;">
+                                                        @p.Importe.ToString("C2")
+                                                    </span>
+                                                </div>
+                                            }
+                                       
+                                        </div>
+                                    </div>
+
+                                    @* TARJETA DEDUCCIONES (Derecha) *@
+                                    <div>
+                                        <div class="card border-0 shadow-sm rounded-3 tarjeta-apartada" style=" height: 100%;">
+                                           
+                                                <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 1.1rem;">
+                                                    <hr style="flex: 1; border-top: 1px solid #dee2e6; margin-right: 10px;">
+                                                    <span>Deducciones</span>
+                                                    <hr style="flex: 1; border-top: 1px solid #dee2e6; margin-left: 10px;">
+                                                </div>
+
+                                                @foreach (var d in empleado.DesgloseDeducciones)
+                                                {
+                                                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 0.5rem; gap: 10px;">
+                                                        <span class="text-dark" style="font-size: 0.9rem; flex:1; padding-left:5px;">@d.Descripcion</span>
+                                                        <span style="color: #ef4444; font-weight: 500; font-size: 0.9rem;min-width:90px;text-align:right;">@d.Importe.ToString("C2")</span>
+                                                    </div>
+                                                }
+                                            
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </DetailRowTemplate>
+                    </DxGrid>
+                </div>
+            </DxTabPage>
+
+            <DxTabPage TabIconCssClass="bi bi-check-circle" Text="Recibos timbrados">
+               
+                    <div style="padding-left:12px;padding-top:5px;">
+                        <br />
+
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+                            <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center;">
+
+                                <div style="display: flex; flex-direction: row;">
+                                    <DxButton style="text-decoration:underline;" Click="SeleccionarTodosTimbrados" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Todos" />
+                                    <DxButton style="text-decoration:underline;" Click="SeleccionarNingunoTimbrados" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Ninguno" />
+                                    <p class="m-0">@(SeleccionadosTimbrados?.Count ?? 0) seleccionado(s)</p>
+                                </div>
+
+                                <div>
+                                    <DxButton Enabled="@(IdPeriodoSeleccionado > 0 && SeleccionadosTimbrados?.Count > 0)"
+                                          Text="@($"Descargar XML ({SeleccionadosTimbrados?.Count ?? 0})")"
+                                          IconCssClass="bi bi-file-earmark-zip-fill"
+                                          RenderStyle="ButtonRenderStyle.Primary"
+                                          Click="DescargarZipSeleccionados" />
+
+                                    <DxButton Enabled="@(IdPeriodoSeleccionado > 0 && SeleccionadosTimbrados?.Count > 0)"
+                                          Text="@($"Enviar por correo ({SeleccionadosTimbrados?.Count ?? 0})")"
+                                          IconCssClass="bi bi-send"
+                                          RenderStyle="ButtonRenderStyle.Primary"
+                                          Click="DescargarZipSeleccionados" />
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Grid Principal *@
+                        <DxGrid @ref="GridTimbrados"
+                                Data="@Empleados.Where(e=>e.Estado=="Timbrado")"
+                                @bind-SelectedDataItems="SeleccionadosTimbrados"
+                                ShowFooter="true"
+                                SelectionMode="GridSelectionMode.Multiple"
+                                AllowSelectRowByClick="false"
+                                PageSize="7"
+                                CssClass="tabla-moderna-nomina shadow-sm border-0">
+
+                            <Columns>
+                                @* Columna de Checkbox *@
+                                <DxGridSelectionColumn Width="50px" />
+
+                            <DxGridDataColumn Caption="SERIE-FOLIO" MinWidth="120" TextAlignment="GridTextAlignment.Center">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var emp = (EmpleadoTimbrado)context.DataItem;
+                                    }
+                                @* Si el folio es nulo, mostramos algo vacío o un guion, si existe, los concatenamos *@
+                                <span class="text-muted" style="font-size: 0.85rem;">
+                                    @(string.IsNullOrEmpty(emp.Serie) && string.IsNullOrEmpty(emp.Folio)
+                                                                        ? "-"
+                                                                        : $"{emp.Serie}-{emp.Folio}")
+                                </span>
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+
+                            @* Columna Empleado *@
+                                <DxGridDataColumn FieldName="Nombre" Caption="EMPLEADO" MinWidth="250">
+                                    <CellDisplayTemplate>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-semibold text-dark" style="font-size: 0.95rem;">@(((EmpleadoTimbrado)context.DataItem).Nombre)</span>
+                                            <small class="text-muted" style="font-size: 0.8rem;">@(((EmpleadoTimbrado)context.DataItem).Puesto)</small>
+                                        </div>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+
+                                <DxGridDataColumn FieldName="Departamento" Caption="DEPARTAMENTO" />
+
+                                <DxGridDataColumn FieldName="UUID" Caption="UUID" MinWidth="200" />
+
+                                <DxGridDataColumn FieldName="Neto" Caption="NETO" TextAlignment="GridTextAlignment.Center">
+                                    <CellDisplayTemplate>
+                                        <span class="fw-bold text-dark" style="font-size: 0.95rem;">@(((EmpleadoTimbrado)context.DataItem).Neto.ToString("C2"))</span>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+
+
+
+                            <DxGridDataColumn Caption="Acciones" TextAlignment="GridTextAlignment.Center">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var item = (EmpleadoTimbrado)context.DataItem;
+                                    }
+                                    @* Un solo div contenedor para toda la fila de botones *@
+                                    <div class="d-flex flex-row justify-content-center cursor-pointer">
+
+                                        <button title="Visualizar timbrado" class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="@(() => AbrirModalDatosTimbrado(item.IdEmpleado, IdPeriodoSeleccionado))">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+
+                                        <button title="Enviar por correo" class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => EnviarTimbrePorCorreo()">
+                                            <i class="bi bi-envelope-at-fill"></i>
+                                        </button>
+
+                                        <button title="Descargar PDF y XML" class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => EnviarTimbrePorCorreo()">
+                                            <i class="bi bi-file-earmark-zip-fill"></i>
+                                        </button>
+
+                                    </div>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            </Columns>
+
+                            <EmptyDataAreaTemplate>
+                                <div class="empty-grid-container">
+                                    <div class="empty-icon-wrapper">
+                                        <i class="bi bi-card-heading"></i>
+                                    </div>
+                                    <h4>Sin empleados timbrados encontrados.</h4>
+                                </div>
+                            </EmptyDataAreaTemplate>
+
+                        </DxGrid>
+                    </div>
+                </DxTabPage>
+        </DxTabs>
+
+    }
+</div>
+
+
+<VisorDatosTimbrado @ref="ModalDatosTimbrado" />
