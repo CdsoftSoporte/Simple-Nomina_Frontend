@@ -1,0 +1,37 @@
+﻿@attribute [Authorize]
+@page "/menu_especiales"
+@using FrontEndSN.Components.Reutilizables
+@using Microsoft.AspNetCore.Authorization
+@using System.IdentityModel.Tokens.Jwt
+@using Microsoft.AspNetCore.Components.Authorization
+@using DevExpress.Blazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<PageTitle>Menú de Acciones Especiales</PageTitle>
+
+
+<div class="dashboard-container page-header-fade fade-in-all">
+
+    <FlechaRegresoMenu Titulo="Especiales"
+                       Subtitulo="Procesos misceláneos del sistema"
+                       RutaRegresar="/dashboard"
+                       Cargando="false" />
+
+    <div class="dashboard-grid">
+        @foreach (var cat in listaCatalogos)
+        {
+            <div class="card catalog-item" @onclick="() => Nav.NavigateTo(cat.Ruta)">
+                <div class="card-icon" style="color: @cat.Color">
+                    <i class="@cat.Icono"></i>
+                </div>
+                <div class="card-content">
+                    <h3>@cat.Titulo</h3>
+                    <p>@cat.Descripcion</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

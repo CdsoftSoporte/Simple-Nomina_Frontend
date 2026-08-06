@@ -102,7 +102,7 @@
 
 <DxWindow @bind-Visible="@mostrarFormulario"
           HeaderText="@(Modelo.Id == 0 ? "Nuevo Empleado" : $"Editar a empleado: {Modelo.Paterno} {Modelo.Materno} {Modelo.Nombre}")"
-          Width="700px"
+          Width="850px"
           MaxWidth="95%"
           Height="650px"
           Modal="true"
@@ -126,7 +126,7 @@
                     <DxTabPage TabIconCssClass="bi bi-person-fill" Text="Datos Personales">
                         <div class="row g-3 mt-2">
 
-                            <div class="col-md-4">
+                            <div class="col-md-4 w-50">
                                 <label class="form-label fw-bold small">Apellido Paterno:</label>
                                 <DxTextBox @bind-Text="@Modelo.Paterno" NullText="Ej. García" />
                                 <ValidationMessage For="@(() => Modelo.Paterno)" />
@@ -309,6 +309,124 @@
                             </div>
                         </div>
                     </DxTabPage>
+
+                    @* ── Tab 5: Expediente ── *@ 
+                    <DxTabPage Text="Expediente Digital" TabIconCssClass="oi oi-folder">
+                        <div class="row mt-3 px-2">
+        
+        
+                            <div class="col-md-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <b><i class="oi oi-cloud-upload me-2"></i> Subir Documento</b>
+                                    </div>
+                                    <div class="card-body">
+                                    
+                                        <div class="mb-3">
+                                            <label class="form-label">Nombre del Documento:</label>
+                                            <DxTextBox @bind-Text="nuevoDocumentoNombre" 
+                                            NullText="Ej. Licencia de manejo, Contrato..." 
+                                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                        </div>
+                    
+                                        <div class="mb-3">
+                                            <label class="form-label">Fecha de Caducidad (Opcional):</label>
+                                            <!-- El ClearButton permite dejarla en nulo si el documento no expira -->
+                                            <DxDateEdit @bind-Date="nuevoDocumentoCaducidad" 
+                                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" 
+                                            NullText="Sin caducidad" />
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label">Archivo (PDF, JPG, PNG):</label>
+                                            <!-- Usamos InputFile nativo de Blazor porque es muy fácil de leer en memoria antes de mandarlo a la API -->
+                                            <InputFile OnChange="@((e) => SubirArchivoExpediente(e))"
+                                                       accept=".png,.jpg,.jpeg,.pdf"
+                                                       class="form-control custom-input" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-8">
+                                <DxGrid Data="@Modelo.Expediente" 
+                                    CssClass="shadow-sm" >
+                                <Columns>
+
+                                        <DxGridDataColumn FieldName="NombreDocumento" Caption="Nombre" Width="40%"></DxGridDataColumn>
+                                        
+
+                                        <DxGridDataColumn FieldName="Extension" Caption="Tipo" Width="10%">
+                                            <CellDisplayTemplate Context="CeldaFormato">
+                                                <span class="badge @(CeldaFormato.Value?.ToString() == ".pdf" ? "bg-danger" : "bg-info")">
+
+                                                    @CeldaFormato.Value?.ToString().Replace(".", "").ToUpper()
+
+                                                </span>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                    
+                                     <DxGridDataColumn FieldName="FechaCaducidad" Caption="Caducidad" Width="30%">
+                                        <CellDisplayTemplate Context="CeldaCaducidad">
+                                        @{
+                                            var fecha = CeldaCaducidad.Value as DateOnly?;
+                                            if (fecha.HasValue)
+                                            {
+                                                // Si ya caducó, lo pintamos de rojo intenso para alertar
+                                                if (fecha.Value < DateOnly.FromDateTime(DateTime.Now))
+                                                {
+                                                    <span class="text-danger fw-bold"><i class="oi oi-warning"></i> @fecha.Value.ToString("dd/MM/yyyy")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@fecha.Value.ToString("dd/MM/yyyy")</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        }
+                                        </CellDisplayTemplate>
+                                    </DxGridDataColumn>
+
+                                    <DxGridCommandColumn Width="20%" Caption="Acciones" NewButtonVisible="false">
+                                        <CellDisplayTemplate Context="CeldaAcciones">
+                                            @{
+                                                   
+                                                var doc = (ExpendienteEmpleados)CeldaAcciones.DataItem;
+                                            }
+
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" 
+                                                        @onclick="() => DescargarDocumento(doc.Id, doc.Extension)" 
+                                                        title="Ver / Descargar">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+
+                                                    <button class="btn btn-outline-danger btn-sm border-0 btn-icon-custom" 
+                                                        @onclick="() => ConfirmarEliminar(doc)"
+                                                        title="Eliminar ">
+                                                        <i class="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </div>
+                                        </CellDisplayTemplate>
+                                    </DxGridCommandColumn>
+                                </Columns>
+                                
+                                <EmptyDataAreaTemplate Context="VacioContext">
+                                    <div class="empty-grid-container" style="max-height:120px !important;">
+                                        <div class="empty-icon-wrapper" style="background-color:rgba(0,0,0,0)!important;">
+                                            <i class="bi bi-file-earmark-break-fill"></i>
+                                        </div>
+                                        <h5>Empleado sin expediente en el sistema</h5>
+                                    </div>
+                                </EmptyDataAreaTemplate>
+                                
+                            </DxGrid>
+                            </div>
+                        </div>
+                    </DxTabPage>
                 </DxTabs>
             </EditForm>
         </div>
@@ -320,9 +438,16 @@
                       RenderStyle="ButtonRenderStyle.Secondary"
                       Click="CerrarFormulario"
                       CssClass="me-2" />
+
+            <DxButton Text="Descargar Expediente"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      Click="DescargarExpediente"
+                      IconCssClass="bi bi-save"
+                      enabled="@TieneArchivos"/>
+
             <DxButton Text="Guardar Cambios"
                       RenderStyle="ButtonRenderStyle.Success"
-                      IconCssClass="bi bi-save"
+                      IconCssClass="bi bi-check-circle-fill"
                       Click="Guardar" />
         </div>
     </FooterTextTemplate>

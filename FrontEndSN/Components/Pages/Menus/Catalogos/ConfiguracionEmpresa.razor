@@ -218,7 +218,7 @@
                         
                         <div class="p-4">
                            
-                            <div style="width:80%;display:flex; flex-direction:row;justify-content:start;gap:1rem;align-items:center;padding:5px;">
+                            <div style="width:90%;display:flex; flex-direction:row;justify-content:start;gap:1rem;align-items:center;padding:5px;">
                                 <div style="width:35% !important;">
                                         <label class="form-label fw-bold">Correo Electrónico para envío de recibos:</label>
                                         <DxTextBox @bind-Text="@Modelo.Correo"
@@ -234,6 +234,11 @@
                                                Password="true"/>
                                     <ValidationMessage For="@(() => Modelo.Correo)" />
                                
+                                </div>
+                                <div style="width:30% !important;padding-top:20px;">
+                                    <DxCheckBox @bind-Checked="Modelo.EnviarCorreosBool"
+                                                CssClass="fw-bold text-primary">Envío automático de recibos al timbrar</DxCheckBox>
+
                                 </div>
                             </div>
                         </div>

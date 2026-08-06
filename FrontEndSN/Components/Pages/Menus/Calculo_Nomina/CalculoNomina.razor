@@ -97,7 +97,6 @@
                         </div>
                         <div style="display: flex; flex-direction: column;">
                             <h6 class="fw-bold mb-0">@empleado.NombreCompleto</h6>
-                            <small class="text-muted">@empleado.puesto - @empleado.departamento</small>
                         </div>
                     </div>
 
@@ -105,6 +104,8 @@
                         <div class="text-end">
                             <small class="text-muted d-block m-1" style="font-size: 0.8rem;">Neto a Pagar</small>
                             <span class="text-primary fw-bold fs-5">$@empleado.netoAPagar</span>
+                            <br />
+                            <small class="text-muted">@empleado.puesto - @empleado.departamento</small>
                         </div>
                         <i class="bi @(empleadoExpandido ? "bi-chevron-up" : "bi-chevron-down") text-muted fs-5"style="padding-right:10px;"></i>
                     </div>

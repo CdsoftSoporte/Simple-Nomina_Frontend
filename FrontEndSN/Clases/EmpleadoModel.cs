@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace FrontEndSN.Clases
@@ -94,6 +95,27 @@ namespace FrontEndSN.Clases
 		public int? IdBanco { get; set; }
 
 		public string NombreCompleto => $"{Paterno} {Materno} {Nombre}".Trim();
+		
+		[JsonPropertyName("archivos_expedientes")]
+		public List<ExpendienteEmpleados> Expediente { get; set; } = new();
+
+	}
+
+	public class ExpendienteEmpleados
+	{
+		public int Id { get; set; }
+
+		[JsonPropertyName("id_empleado")]
+		public int IdEmpleado { get; set; }
+
+		[JsonPropertyName("nombre_documento")]
+		public string NombreDocumento { get; set; }
+		
+		[JsonPropertyName("extension")]
+		public string Extension { get; set; }
+		
+		[JsonPropertyName("fecha_caducidad")]
+		public DateOnly? FechaCaducidad { get; set; }
 
 	}
 

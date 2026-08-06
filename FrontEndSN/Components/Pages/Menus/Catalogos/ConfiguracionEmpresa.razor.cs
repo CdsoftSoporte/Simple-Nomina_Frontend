@@ -258,11 +258,21 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			[JsonPropertyName("tipo_empresa")]
 			public char TipoEmpresa { get; set; }
 
+			[JsonPropertyName("enviar_correos_automatico")]
+			public char EnviarCorreosAutomatico { get; set; }
+
 			[JsonIgnore]
 			public bool TimbradoPruebaBool
 			{
 				get => TimbradoPrueba == 'S';
 				set => TimbradoPrueba = value ? 'S' : 'N';
+			}
+
+			[JsonIgnore]
+			public bool EnviarCorreosBool
+			{
+				get => EnviarCorreosAutomatico == 'S';
+				set => EnviarCorreosAutomatico = value ? 'S' : 'N';
 			}
 		}
 	}

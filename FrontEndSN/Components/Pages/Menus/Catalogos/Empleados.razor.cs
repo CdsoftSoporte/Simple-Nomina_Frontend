@@ -1,21 +1,27 @@
 ﻿using DevExpress.Blazor;
 using DevExpress.Data.Filtering;
+using DevExpress.DocumentView;
 using FrontEndSN.Clases;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static FrontEndSN.Components.Pages.Menus.Catalogos.ConfiguracionEmpresa;
+using static FrontEndSN.Components.Pages.Menus.Catalogos.Departamentos;
+using static FrontEndSN.Components.Pages.Menus.Catalogos.Uma;
 
 namespace FrontEndSN.Components.Pages.Menus.Catalogos
 {
 	public partial class Empleados
 	{
 		private List<EmpleadoModel> Lista = new();
+		private List<ExpendienteEmpleados> Expediente = new();
 		private EmpleadoModel Modelo = new();
 		private EditContext? editContext;
 		private bool cargando = true;
 		private bool mostrarFormulario = false;
+		private bool TieneArchivos = false;
 
 		// Catálogos
 		private List<DeptoItem> DeptosList = new();
@@ -46,6 +52,10 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		int ventanaX;
 		int ventanaY;
 
+		private string? nuevoDocumentoNombre;
+		private DateOnly? nuevoDocumentoCaducidad;
+
+
 		protected override async Task OnInitializedAsync()
 		{
 			await Task.WhenAll(
@@ -54,7 +64,211 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			);
 		}
 
+		private async Task SubirArchivoExpediente(InputFileChangeEventArgs e)
+		{
+			try
+			{
+				// 1. Validar que el usuario haya puesto un nombre al documento antes de enviarlo
+				if (string.IsNullOrWhiteSpace(nuevoDocumentoNombre))
+				{
+					await JS.InvokeVoidAsync("notifier.error", "Por favor, ingresa el nombre del documento.");
+					return;
+				}
+
+				StateHasChanged();
+
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var archivo = e.File;
+				var contenido = new MultipartFormDataContent();
+
+				//  Agregar el Archivo
+				var streamContent = new StreamContent(archivo.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024)); // Límite 5MB
+				contenido.Add(streamContent, "archivo", archivo.Name);
+
+				//  Agregar los campos de texto
+				contenido.Add(new StringContent(nuevoDocumentoNombre), "nombre_documento");
+
+				//  Agregar la fecha solo si el usuario seleccionó una
+				if (nuevoDocumentoCaducidad.HasValue)
+				{
+					// La mandamos en formato ISO para que el backend la entienda perfectamente
+					contenido.Add(new StringContent(nuevoDocumentoCaducidad.Value.ToString("yyyy-MM-dd")), "fecha_caducidad");
+				}
+
+
+				var request = new HttpRequestMessage(HttpMethod.Post, $"api/ExpedientesEmpleados/subir/{Modelo.Id}");
+
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+				request.Content = contenido;
+
+				// 6. Enviar
+				var response = await Http.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+
+
+					await JS.InvokeVoidAsync("notifier.success", "Archivo guardado correctamente.");
+
+					nuevoDocumentoNombre = string.Empty;
+					nuevoDocumentoCaducidad = null;
+					await TraerExpedienteEmpleado(Modelo.Id);
+					Modelo.Expediente = Expediente;
+
+
+				}
+				else
+				{
+					// Extraer el mensaje de error del backend para mostrarlo
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Error: " + ex.Message);
+			}
+			finally
+			{
+				StateHasChanged();
+			}
+		}
 		
+		private async Task DescargarExpediente()
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				// Apuntamos al nuevo endpoint de ZIP
+				var request = new HttpRequestMessage(HttpMethod.Get, $"api/ExpedientesEmpleados/descargar_expediente/{Modelo.Id}");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+					var fileStream = await response.Content.ReadAsStreamAsync();
+					using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+					// Le decimos a JS que lo guarde como ZIP
+					await JS.InvokeVoidAsync("DescargarArchivos", streamRef, $"Expediente_{Modelo.Paterno}_{Modelo.Materno}_{Modelo.Nombre}.zip");
+				}
+				else
+				{
+					await JS.InvokeVoidAsync("notifier.error", "Empleado sin documentos en su expediente");
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Error: " + ex.Message);
+			}
+		}
+
+		private async Task DescargarDocumento(int id_documento,string extension)
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				// 1. Configuramos la petición GET (Asegúrate de que la ruta coincida con tu endpoint)
+				var request = new HttpRequestMessage(HttpMethod.Get, $"api/ExpedientesEmpleados/descargar/{id_documento}");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				// 2. Enviamos la petición
+				var response = await Http.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+					// 3. Leemos el archivo como Stream
+					var fileStream = await response.Content.ReadAsStreamAsync();
+					using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+					// 4. Determinamos el MIME Type en el frontend para que JS sepa cómo dibujarlo
+					string mimeType = extension.ToLower() switch
+					{
+						".pdf" => "application/pdf",
+						".jpg" => "image/jpeg",
+						".jpeg" => "image/jpeg",
+						".png" => "image/png",
+						_ => "application/octet-stream"
+					};
+
+					// 5. Llamamos a nuestra nueva función de JavaScript
+					await JS.InvokeVoidAsync("abrirArchivoEnNuevaPestana", streamRef, mimeType);
+				}
+				else
+				{
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo obtener el archivo.");
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Error: " + ex.Message);
+			}
+		}
+
+		private async Task ConfirmarEliminar(ExpendienteEmpleados item)
+		{
+			bool confirmed = await JS.InvokeAsync<bool>("notifier.confirm",
+			"¿Eliminar Registro?",
+			 $"¿Deseas borrar el documento {item.NombreDocumento} del expediente?");
+			if (confirmed)
+			{
+				await EliminarDocumento(item.Id);
+				await TraerExpedienteEmpleado(item.IdEmpleado);
+				Modelo.Expediente = Expediente;
+
+			}
+			StateHasChanged();
+		}
+
+		private async Task EliminarDocumento(int id)
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+
+				var request = new HttpRequestMessage(HttpMethod.Delete, $"api/ExpedientesEmpleados/borrar/{id}");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+
+					if (response.IsSuccessStatusCode)
+					{
+						await JS.InvokeVoidAsync("notifier.success", "Registro eliminado correctamente");
+					}
+					else
+					{
+						await JS.InvokeVoidAsync("notifier.error", response.Content);
+					}
+
+				}
+				else
+				{
+
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+
+					string mensajePrincipal = errorData?.Message ?? "Error inesperado";
+					string detalleTecnico = errorData?.Details ?? "No hay detalles adicionales.";
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo guardar la información: " + mensajePrincipal + " " + detalleTecnico);
+
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", $"Ocurrió un error: " + ex.InnerException);
+			}
+		}
+		
+
 		private async Task CargarLista()
 		{
 			cargando = true;
@@ -230,6 +444,36 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				StateHasChanged();
 			}
 		}
+
+		private async Task TraerExpedienteEmpleado(int id_empleado)
+		{
+			Expediente.Clear();
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) return;
+
+				var request = new HttpRequestMessage(HttpMethod.Get, $"api/ExpedientesEmpleados/listar/{id_empleado}");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<ExpendienteEmpleados>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					Expediente = resultado?.Data ?? new();
+				}
+
+				TieneArchivos =(Expediente.Count>0?true:false);
+
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Error al cargar Expediente: " + ex.Message);
+			}
+
+		}
+
 		private async Task AbrirFormulario(EmpleadoModel? item = null)
 		{
 			if (item == null)
@@ -250,6 +494,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			}
 			else
 			{
+				 await TraerExpedienteEmpleado(item.Id);
+
 				Modelo = new EmpleadoModel
 				{
 					Id = item.Id,
@@ -278,7 +524,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					Correo = item.Correo,
 					NoCuenta = item.NoCuenta,
 					IdBanco = item.IdBanco,
-					Observaciones = item.Observaciones
+					Observaciones = item.Observaciones,
+					Expediente = Expediente
 				};
 			}
 
@@ -290,7 +537,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 			//// 2. Calculamos el centro: (Mitad de pantalla) - (Mitad del modal)
 			//// Si el modal mide 600px, restamos 300.
-			ventanaX = (anchoPantalla / 2) - 325;
+			ventanaX = (anchoPantalla / 2) - 100;
 			ventanaY = 100; // Una altura cómoda desde el techo
 			mostrarFormulario = true;
 			

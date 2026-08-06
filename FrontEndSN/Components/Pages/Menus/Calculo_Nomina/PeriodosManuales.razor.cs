@@ -252,7 +252,7 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 					if (response.IsSuccessStatusCode)
 					{
-						await JS.InvokeVoidAsync("notifier.success", "Empleado eliminado del periodo correctamente");
+						await JS.InvokeVoidAsync("notifier.success", "Concepto eliminado del empleado correctamente");
 					}
 					else
 					{

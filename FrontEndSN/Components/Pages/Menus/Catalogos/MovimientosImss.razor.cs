@@ -19,13 +19,16 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		private List<dynamic> tiposOpciones = new() {
 		new { Valor = 'A', Texto = "Alta" },
 		new { Valor = 'B', Texto = "Baja" },
-		new { Valor = 'M', Texto = "Modificación de Salario" }
+		new { Valor = 'M', Texto = "Modificación de Salario" },
+		new { Valor = 'R', Texto = "Reingreso"},
+		new { Valor = 'F', Texto = "Ausentismo / Falta"},
+		new { Valor = 'I', Texto = "Incapacidad"},
 		};
 
 		private List<dynamic> infonavitOpciones = new() {
 		new { Valor = (byte)1, Texto = "Porcentaje (%)" },
 		new { Valor = (byte)2, Texto = "Cuota Fija ($)" },
-		new { Valor = (byte)3, Texto = "Veces UMA" }
+		new { Valor = (byte)3, Texto = "Veces Salario Mínimo" }
 		};
 		protected override async Task OnInitializedAsync()
 		{

@@ -21,6 +21,7 @@ namespace FrontEndSN.Clases
 		protected List<PeriodosItem> ListaPeriodos { get; set; }
 		protected List<ConceptoItem> ListaConceptos { get; set; }
 		protected List<EjerciciosItem> ListaEjercicios {  get; set; }
+		protected List<RegistroPatronalItem> ListaPatrones {  get; set; }
 
 
 		protected void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
@@ -28,8 +29,6 @@ namespace FrontEndSN.Clases
 			if (e.ElementType == GridElementType.SearchBoxContainer)
 			{
 				e.Style = "Width: 100%;";
-
-
 			}
 		}
 		protected async Task PrepararVentana(int anchoModal)
@@ -52,6 +51,35 @@ namespace FrontEndSN.Clases
 			
 		}
 
+		protected async Task CargarPatronesParaCombo()
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/RegistrosPatronales/Listar");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<RegistroPatronalItem>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					ListaPatrones = resultado?.Data ?? new();
+				}
+				else
+				{
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
+		}
+
 		protected async Task CargarEmpleadosParaCombos()
 		{
 			try
@@ -68,6 +96,7 @@ namespace FrontEndSN.Clases
 					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<EmpleadoDTO>>>(
 						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 					ListaEmpleados = resultado?.Data ?? new();
+					ListaEmpleados.Insert(0,new EmpleadoDTO { Id = 0, Paterno = "Todos Los Empleados", Materno = "" });
 				}
 				else
 				{

@@ -48,7 +48,10 @@ namespace FrontEndSN.Components.Pages.Menus.Timbrado
 			TotalEmpleados = 0;
 			TotalEmpleadosPendientes = 0;
 			TotalEmpleadosTimbrados = 0;
+			SeleccionadosPorTimbrar = new List<object>();
+			SeleccionadosTimbrados = new List<object>();
 			Empleados.Clear();
+
 			 
 			
 		}
@@ -57,40 +60,55 @@ namespace FrontEndSN.Components.Pages.Menus.Timbrado
 		protected async Task TimbrarSeleccionados()
 		{
 			if (SeleccionadosPorTimbrar == null || !SeleccionadosPorTimbrar.Any()) return;
+			try
+			{
 
-			//  Extraemos solo los ids de la selección
-			var IdsSeleccionados = SeleccionadosPorTimbrar
+				cargando = true;
+
+				//  Extraemos solo los ids de la selección
+				var IdsSeleccionados = SeleccionadosPorTimbrar
 				.Cast<EmpleadoTimbrado>()
 				.Select(e => e.IdEmpleado)
 				.ToList();
 
-			var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
 		
-			var request = new HttpRequestMessage(HttpMethod.Post, $"api/Timbrado/TimbrarPeriodo/{IdPeriodoSeleccionado}")
-			{
-				Content = JsonContent.Create(IdsSeleccionados)
-			};
-			request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+				var request = new HttpRequestMessage(HttpMethod.Post, $"api/Timbrado/TimbrarPeriodo/{IdPeriodoSeleccionado}")
+				{
+					Content = JsonContent.Create(IdsSeleccionados)
+				};
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-			var response = await Http.SendAsync(request);
-			response.EnsureSuccessStatusCode();
+				var response = await Http.SendAsync(request);
+				response.EnsureSuccessStatusCode();
 
-			// 1. Revisamos qué tipo de contenido nos regresó el servidor
-			var contentType = response.Content.Headers.ContentType?.MediaType;
+				// 1. Revisamos qué tipo de contenido nos regresó el servidor
+				var contentType = response.Content.Headers.ContentType?.MediaType;
 
-			if (contentType == "application/json")
-			{
+				if (contentType == "application/json")
+				{
 
-				await JS.InvokeVoidAsync("notifier.success", $"{IdsSeleccionados.Count} empleado(s) timbrado(s) correctamente.");
-			}
-			else
-			{
+					await JS.InvokeVoidAsync("notifier.success", $"{IdsSeleccionados.Count} empleado(s) timbrado(s) correctamente.");
+				}
+				else
+				{
 				
-				using var fileStream = await response.Content.ReadAsStreamAsync();
-				using var streamRef = new DotNetStreamReference(stream: fileStream);
+					using var fileStream = await response.Content.ReadAsStreamAsync();
+					using var streamRef = new DotNetStreamReference(stream: fileStream);
 
-				await JS.InvokeVoidAsync("DescargarArchivos", streamRef, "Errores_Timbrado.xlsx");
-				await JS.InvokeVoidAsync("notifier.error", "Al menos un empleado tuvo un error al momento de timbrarse, se le descargará un archivo de Excel con los errores mencionados");
+					await JS.InvokeVoidAsync("DescargarArchivos", streamRef, "Errores_Timbrado.xlsx");
+					await JS.InvokeVoidAsync("notifier.error", "Al menos un empleado tuvo un error al momento de timbrarse, se le descargará un archivo de Excel con los errores mencionados");
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
+			finally
+			{
+				await CargaEstadoTimbrado();
+				cargando = false;
+				StateHasChanged();
 			}
 		}
 
@@ -167,6 +185,8 @@ namespace FrontEndSN.Components.Pages.Menus.Timbrado
 				return;
 			try
 			{
+				cargando = true;
+				LimpiarTotales();
 				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
 				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
 
@@ -197,6 +217,8 @@ namespace FrontEndSN.Components.Pages.Menus.Timbrado
 			}
 			finally
 			{
+				Thread.Sleep(500);
+				cargando = false;
 				StateHasChanged();
 			}
 		}
@@ -211,8 +233,6 @@ namespace FrontEndSN.Components.Pages.Menus.Timbrado
 		{
 			ModalDatosTimbrado.Mostrar(IdEmpleado,IdPeriodo);
 		}
-
-
 
 		private async Task ExportarAnaliticoDeNomina()
 		{
