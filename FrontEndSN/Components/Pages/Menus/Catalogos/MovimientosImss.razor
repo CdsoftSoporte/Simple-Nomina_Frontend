@@ -22,14 +22,18 @@
         <div class="row align-items-center">
             <div class="col-md-5">
                 <label class="form-label fw-bold small text-primary">Empleado:</label>
-                <DxComboBox Data="@ListaEmpleados"
+                
+                <div style="width:40%;">
+                    <DxComboBox Data="@ListaEmpleados"
                             TextFieldName="NombreCompleto"
                             ValueFieldName="Id"
                             Value="@IdEmpleadoSeleccionado"
                             ValueChanged="@((int id) => OnEmpleadoChanged(id))"
                             SearchMode="@ListSearchMode.AutoSearch"
                             NullText="Busque un empleado para ver su historial..."
-                            CssClass="w-100" />
+                            CssClass="w-50" />
+                </div>
+            
             </div>
             
         </div>
@@ -40,6 +44,8 @@
         <div class="row align-items-center">
             <div class="col-md-5">
                 <label class="form-label fw-bold small text-primary">Registro Patronal:</label>
+
+                <div style="width:40%;">
                 <DxComboBox Data="@PatronesList"
                             TextFieldName="razon_social"
                             ValueFieldName="id"
@@ -47,7 +53,9 @@
                             ValueChanged="@((int id) => OnPatronChanged(id))"
                             SearchMode="@ListSearchMode.AutoSearch"
                             NullText="Escoja un registro patronal..."
-                            CssClass="w-100" />
+                            CssClass="w-50" />
+
+                </div>
             </div>
 
         </div>
@@ -143,7 +151,8 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-12">
                                 <label class="form-label fw-bold small">Registro Patronal:</label>
-                                <DxComboBox Data="@PatronesList" TextFieldName="razon_social" ValueFieldName="id" @bind-Value="@Modelo.id_patron" />
+                                <DxComboBox Data="@PatronesList" TextFieldName="razon_social" ValueFieldName="id" Value="@Modelo.id_patron"
+                                                            ValueChanged="@((int id) => OnRegistroPatronalChanged(id))" ValidationEnabled="false"/>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Fecha del Movimiento:</label>
@@ -217,6 +226,17 @@
                                 <DxDateEdit @bind-Date="@Modelo.fecha_inicio_descuento_infonavit" />
                             </div>
                         </div>
+                    </DxTabPage>
+                    <DxTabPage TabIconCssClass="bi bi-calculator" Text="Cálculo">
+                    
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">Nómina:</label>
+                                <DxComboBox Data="@ListaNominas" ValueFieldName="Id" TextFieldName="DescripcionCompleta" @bind-Value="@Modelo.id_nomina" />
+                                <ValidationMessage For="@(() => Modelo.id_nomina)" />
+                            </div>
+                        </div>
+                    
                     </DxTabPage>
                 </DxTabs>
             </EditForm>

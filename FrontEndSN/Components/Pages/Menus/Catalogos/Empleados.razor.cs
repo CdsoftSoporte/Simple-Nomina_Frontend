@@ -13,7 +13,7 @@ using static FrontEndSN.Components.Pages.Menus.Catalogos.Uma;
 
 namespace FrontEndSN.Components.Pages.Menus.Catalogos
 {
-	public partial class Empleados
+	public partial class Empleados:VentanaBase
 	{
 		private List<EmpleadoModel> Lista = new();
 		private List<ExpendienteEmpleados> Expediente = new();
@@ -51,6 +51,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		DxWindow WindowRef;
 		int ventanaX;
 		int ventanaY;
+		private int IdCentroDeCostosSeleccionado = 0;
 
 		private string? nuevoDocumentoNombre;
 		private DateOnly? nuevoDocumentoCaducidad;
@@ -310,6 +311,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				CargarDepto(),
 				CargarPuestos(),
 				CargarTurnos(),
+				CargarCentrosDeCostosParaCombo(),
 				CargarSat("api/CatalogosSat/TipoRegimen", r => TipoRegimenList = r),
 				CargarSat("api/CatalogosSat/TipoContrato", r => TipoContratoList = r),
 				CargarSat("api/CatalogosSat/TipoJornada", r => TipoJornadaList = r),
@@ -506,6 +508,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					Curp = item.Curp,
 					Nss = item.Nss,
 					IdDepartamento = item.IdDepartamento,
+					IdCentroCostos=item.IdCentroCostos,
 					IdPuesto = item.IdPuesto,
 					IdTurno = item.IdTurno,
 					IdTipoRegimen = item.IdTipoRegimen,
@@ -597,6 +600,12 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 
 			}
+		}
+
+		protected async Task OnCentroCostosChanged(int nuevoCentro)
+		{
+			IdCentroDeCostosSeleccionado = nuevoCentro;
+			StateHasChanged();
 		}
 
 		public class DeptoItem

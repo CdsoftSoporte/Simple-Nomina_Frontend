@@ -34,7 +34,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		{
 			await Task.WhenAll(
 							CargarEmpleadosParaCombos(),
-							CargarPatrones()
+							CargarPatrones(),
+							CargarNominasParaCombo()
 						);
 		}
 
@@ -85,6 +86,13 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			if (id > 0 && IdEmpleadoSeleccionado>0) await CargarHistorialEmpleadoYPatron(IdEmpleadoSeleccionado,IdPatronSeleccionado);
 		}
 
+		private async Task OnRegistroPatronalChanged(int id)
+		{
+			Modelo.id_patron = id;
+			ListaNominas.Clear();
+			await CargarNominasParaCombo();
+		}
+
 		private async Task CargarHistorialEmpleadoYPatron(int IdEmpleado,int IdPatron)
 		{
 			cargando = true;
@@ -106,7 +114,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				else
 				{
 					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
-					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado")+errorData.Details);
 				}
 			}
 			catch (Exception ex)
@@ -132,7 +140,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					tipo_movimiento = 'M',
 					dias_aguinaldo = 15,
 					dias_vacaciones = 12,
-					prima_vacacional = 0.25m
+					prima_vacacional = 0.25m,
+					id_patron= IdPatronSeleccionado,
 					
 				};
 			}
@@ -276,7 +285,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 
 		private void CerrarFormulario() => MostrarFormulario = false;
 
-		private string GetTipoMovimientoTexto(char t) => t switch { 'A' => "Alta", 'B' => "Baja", 'M' => "Modif.", _ => "Mov. Inválido" };
+		private string GetTipoMovimientoTexto(char t) => t switch { 'A' => "Alta", 'B' => "Baja", 'M' => "Modif.",'R'=>"Reing.",'F'=>"Falta",'I'=>"Incap.", _ => "Mov. Inválido" };
 
 		public class RegistroPatronalItem
 		{

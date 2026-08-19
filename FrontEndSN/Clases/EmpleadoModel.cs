@@ -33,6 +33,10 @@ namespace FrontEndSN.Clases
 		[JsonPropertyName("id_departamento")]
 		public int IdDepartamento { get; set; }
 
+		[Range(1, int.MaxValue, ErrorMessage = "Seleccione un Centro de Ctos.")]
+		[JsonPropertyName("id_centro_costos")]
+		public int IdCentroCostos { get; set; }
+
 		[Range(1, int.MaxValue, ErrorMessage = "Seleccione un puesto")]
 		[JsonPropertyName("id_puesto")]
 		public int IdPuesto { get; set; }

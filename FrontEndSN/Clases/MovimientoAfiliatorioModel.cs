@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FrontEndSN.Clases
 {
@@ -20,11 +21,17 @@ namespace FrontEndSN.Clases
 		[MaybeNull]
 		public string? cuenta_infonavit { get; set; }
 		[MaybeNull]
-		public byte? tipo_descuento_infonavit { get; set; }
+		public byte tipo_descuento_infonavit { get; set; }
 		[MaybeNull]
 		public DateOnly? fecha_inicio_descuento_infonavit { get; set; }
 		[MaybeNull]
 		public decimal? importe_descuento_infonavit { get; set; }
+		[MaybeNull]
+		public string? folio_incapacidad { get; set; }
+		[MaybeNull]
+		public int? dias_incidencia { get; set; }
+		[Required(ErrorMessage = "Selecciona una nómina")]
+		public int? id_nomina { get; set; }
 
 	}
 }

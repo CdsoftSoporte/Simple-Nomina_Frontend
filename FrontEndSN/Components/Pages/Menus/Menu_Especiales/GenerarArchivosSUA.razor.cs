@@ -7,7 +7,8 @@ namespace FrontEndSN.Components.Pages.Menus.Menu_Especiales
 	{
 		private bool cargando = false;
 		private int IdPatronSeleccionado = 0;
-		private char MovimientoSeleccionado;
+		private char MovimientoSeleccionado='T';
+		private int IdEmpleadoSeleccionado = 0;
 
 		private DateOnly FechaDesdeConsulta=DateOnly.FromDateTime(DateTime.Today);
 		private DateOnly FechaHastaConsulta=DateOnly.FromDateTime(DateTime.Today);
@@ -28,7 +29,7 @@ namespace FrontEndSN.Components.Pages.Menus.Menu_Especiales
 			cargando = true;
 			await Task.WhenAll(
 					CargarPatronesParaCombo(),
-					CargarEmpleadosParaCombos()
+					CargarEmpleadosParaCombos('S')
 						);
 
 			cargando = false;

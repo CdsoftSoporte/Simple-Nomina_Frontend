@@ -1,0 +1,77 @@
+﻿@attribute [Authorize]
+@page "/centros_costos"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
+@using FrontEndSN.Components.Modales
+@inherits VentanaBase;
+<PageTitle>Catálogo Centros de Costos</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+    <FlechaRegresoMenu Titulo="Centros de Costos"
+                       Subtitulo="Crea, edita o elimina centros de costos"
+                       RutaRegresar="/menu_catalogos"
+                       Cargando="cargando" />
+
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+         <DxButton Text="Nuevo Centro de Costos"
+                  Click="() => AbrirModal()"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  IconCssClass="bi bi-plus-circle-fill"
+                  CssClass="shadow-sm" /> 
+
+    @* Tabla de Datos *@
+    <div class="card shadow-sm border-0 p-3 fade-in-all" style="width:500px!important;">
+        <DxGrid Data="@ListaCentros"
+                PageSize="10"
+                ShowFilterRow="false"
+                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                HighlightRowOnHover="true"
+                TextAlignment="GridTextAlignment.Center">
+            <Columns>
+                <DxGridDataColumn FieldName="Nombre" Caption="Nombre" Width="220px" />
+                <DxGridDataColumn FieldName="Descripcion" Caption="Descripcion" Width="150px" />
+
+                <DxGridDataColumn Caption="Acciones" Width="128px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (CentrosDeCostos)context.DataItem;
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => AbrirModal(item)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm border-0 btn-icon-custom" @onclick="() => ConfirmarEliminar(item)">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        }
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <EmptyDataAreaTemplate>
+                <div class="empty-grid-container">
+                    <div class="empty-icon-wrapper">
+                            <i class="bi bi-buildings-fill"></i>
+                    </div>
+                    <h4>Sin Centro de Costos registrados</h4>
+                    <p>Registre al menos un Centro de Costos.</p>
+                </div>
+            </EmptyDataAreaTemplate>
+        </DxGrid>
+    </div>
+
+    }
+</div>
+
+
+<AgregarCentroCostos @ref="ModalCentroCostos" OnCentroAgregado="CargarCentrosDeCostos" />

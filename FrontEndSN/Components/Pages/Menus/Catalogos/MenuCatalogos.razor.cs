@@ -20,6 +20,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			new MenuOpcion { Titulo = "Grupos de Prestaciones", Descripcion = "Grupo de prestaciones de Ley y personalizados.", Ruta = "/gruposprestaciones", Icono = "bi bi-clipboard2-heart", Color = "#d63384" },
 			new MenuOpcion { Titulo = "Registros Patronales", Descripcion = "Catálogo y configuracion de Patrones.", Ruta = "/registros_patronales", Icono = "bi bi-people-fill", Color = "#198754" },			
 			new MenuOpcion { Titulo = "Empleados", Descripcion = "Catálogo de empleados.", Ruta = "/empleados", Icono = "bi bi-person-badge-fill", Color = "#fd7e14" },
+			new MenuOpcion { Titulo = "Centros de Costos", Descripcion = "Catálogo de Centros de Costos.", Ruta = "/centros_costos", Icono = "bi bi-buildings-fill", Color = "#20c997" },
 		};
 
 

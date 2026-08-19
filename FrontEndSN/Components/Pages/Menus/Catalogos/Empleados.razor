@@ -3,6 +3,7 @@
 @using DevExpress.Blazor
 @using FrontEndSN.Clases
 @using FrontEndSN.Components.Reutilizables
+@inherits VentanaBase;
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Nav
@@ -222,6 +223,23 @@
                     <DxTabPage TabIconCssClass="bi bi-tools" Text="Datos Laborales" >
                         <div class="row g-3 mt-2">
                             
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Centro de Ctos.:</label>
+
+                                <DxComboBox Data="@ListaCentros"
+                                            Value="@Modelo.IdCentroCostos"
+                                            ValueExpression="@(() => Modelo.IdCentroCostos)"
+                                            ValueChanged="@((int valor) => OnCentroCostosChanged(valor))"
+                                            TextFieldName="Nombre"
+                                            ValueFieldName="Id"
+                                            NullText="Seleccione..."
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                                <ValidationMessage For="@(() => Modelo.IdCentroCostos)" />
+
+                            </div>
+
+
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Departamento:</label>
                                 <DxComboBox Data="@DeptosList"

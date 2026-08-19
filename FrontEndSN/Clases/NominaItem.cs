@@ -11,7 +11,10 @@ namespace FrontEndSN.Clases
 
 		[JsonPropertyName("id_patron")]
 		public int IdPatron { get; set; }
-		public char Tipo {  get; set; }
+		public char Tipo { get; set; }
+		public string Ejercicio { get; set; }
+
+
 		public string DescripcionCompleta => $"{Descripcion} {"-"} {Tipo}".Trim();
 	}
 }

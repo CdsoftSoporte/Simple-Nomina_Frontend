@@ -22,6 +22,7 @@ namespace FrontEndSN.Clases
 		protected List<ConceptoItem> ListaConceptos { get; set; }
 		protected List<EjerciciosItem> ListaEjercicios {  get; set; }
 		protected List<RegistroPatronalItem> ListaPatrones {  get; set; }
+		protected List<CentrosDeCostosItem> ListaCentros { get; set; }
 
 
 		protected void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
@@ -80,7 +81,7 @@ namespace FrontEndSN.Clases
 			}
 		}
 
-		protected async Task CargarEmpleadosParaCombos()
+		protected async Task CargarEmpleadosParaCombos(char TodosEmpleados='N')
 		{
 			try
 			{
@@ -96,7 +97,11 @@ namespace FrontEndSN.Clases
 					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<EmpleadoDTO>>>(
 						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 					ListaEmpleados = resultado?.Data ?? new();
-					ListaEmpleados.Insert(0,new EmpleadoDTO { Id = 0, Paterno = "Todos Los Empleados", Materno = "" });
+					if (TodosEmpleados == 'S')
+					{
+						ListaEmpleados.Insert(0, new EmpleadoDTO { Id = 0, Paterno = "Todos Los Empleados", Materno = "" });
+					}
+					
 				}
 				else
 				{
@@ -212,6 +217,55 @@ namespace FrontEndSN.Clases
 			}
 			finally
 			{
+				StateHasChanged();
+			}
+		}
+
+		protected async Task CargarCentrosDeCostosParaCombo(char TodosLosCentros='N')
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+
+				if (string.IsNullOrEmpty(token))
+				{
+
+					Console.WriteLine("No se encontró el token de autenticación.");
+					Nav.NavigateTo("/login");
+					return;
+				}
+
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/CentroDeCostos/Listar");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<CentrosDeCostosItem>>>(
+									new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+					);
+					ListaCentros = resultado.Data ?? new();
+					
+					if (TodosLosCentros == 'S')
+					{
+						ListaCentros.Insert(0, new CentrosDeCostosItem { Id = 0, Nombre = "Todos los Centros" });
+					}
+					
+
+				}
+				else
+				{
+					Console.WriteLine($"Error en la petición: {response.StatusCode}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error de conexión: {ex.Message}");
+			}
+			finally
+			{
+
 				StateHasChanged();
 			}
 		}

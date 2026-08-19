@@ -19,7 +19,7 @@
     <div class="card shadow-sm mb-4 border-0">
         <div class="card-body">
             <div class="row align-items-end">
-                <div class="col-md-4 mb-3 mb-md-0">
+                <div class="col-md-4 mb-3 mb-md-0" style="width:45% !important;">
                     <label class="form-label fw-bold">Nómina:</label>
                     <DxComboBox Data="@ListaNominas"
                                 TextFieldName="DescripcionCompleta"
@@ -28,9 +28,9 @@
                                 ValueChanged="(int newValue) => OnNominaChanged(newValue)"
                                 NullText="Seleccione una nómina..."
                                 SearchMode="ListSearchMode.AutoSearch"
-                                CssClass="w-100" />
+                                CssClass="w-25" />
                 </div>
-                <div class="col-md-4 mb-3 mb-md-0">
+                <div class="col-md-4 mb-3 mb-md-0" style="width:45% !important;">
                     <label class="form-label fw-bold">Periodo:</label>
                     <DxComboBox Data="@ListaPeriodos"
                                 TextFieldName="DescripcionCompleta"
@@ -42,7 +42,7 @@
                                 Enabled="@(IdNominaSeleccionada > 0)"
                                 CssClass="w-100" />
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" style="display:none;">
                     <DxButton Text="Buscar Incidencias"
                               Click="@(() => BuscarIncidencias())"
                               RenderStyle="ButtonRenderStyle.Primary"

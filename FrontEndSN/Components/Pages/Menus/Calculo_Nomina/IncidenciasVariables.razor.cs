@@ -53,6 +53,7 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			{
 				ListaIncidencias.Clear();
 				IdPeriodoSeleccionado = nuevoIdPeriodo;
+				BuscarIncidencias();
 			}
 		}
 

@@ -12,7 +12,7 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			new MenuOpcion { Titulo = "Repetitivos", Descripcion = "Definición de conceptos que aplicarán a varios periodos.", Ruta = "/departamentos", Icono = "bi bi-recycle", Color = "#d63384" },
 			new MenuOpcion { Titulo = "Cálculo", Descripcion = "Calcular y visualizar periodos de nómina.", Ruta = "/calculo_nomina", Icono = "bi bi-calculator-fill", Color = "#198754" },
 			new MenuOpcion { Titulo = "Periodos Manuales", Descripcion = "Captura y edita totalmente un periodo de nomina", Ruta = "/periodos_manuales", Icono = "bi bi-pencil-square", Color = "#fd7e14" },			
-		//	new MenuOpcion { Titulo = "Salarios Mínimos", Descripcion = "Histórico de salarios por ley.", Ruta = "/salarios_minimos", Icono = "bi bi-currency-exchange", Color = "#20c997" },
+			new MenuOpcion { Titulo = "Calculo de Aguinaldos", Descripcion = "Cálculo masivo de aguinaldos.", Ruta = "/calculo_aguinaldos", Icono = "bi bi-cash-stack", Color = "#20c997" },
 
 		};
 	}

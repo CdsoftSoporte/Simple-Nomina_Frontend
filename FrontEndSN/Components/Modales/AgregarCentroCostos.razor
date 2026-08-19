@@ -1,0 +1,34 @@
+﻿@using FrontEndSN.Clases
+@inherits VentanaBase
+<DxWindow HeaderText="@($"{TituloModal}")"
+          @bind-Visible="@IsVisible"
+          Width="600px"
+          ShowFooter="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          AllowResize="false">
+    <BodyTemplate>
+        <div class="p-4 w-100">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nombre:</label>
+                <DxTextBox @bind-Text="@NombreCentro" NullText="Ingrese un nombre para su centro de costos" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Descripción:</label>
+                <DxTextBox @bind-Text="@Descripcion" NullText="Descripción (opcional)" />
+            </div>
+
+        </div>
+
+
+
+    </BodyTemplate>
+    <FooterTextTemplate>
+        <div class="d-flex justify-content-end w-100">
+            <DxButton Text="Guardar" Enabled="@(NombreCentro.Length > 0  && NombreCentro.Length<=50)" RenderStyle="ButtonRenderStyle.Success" Click="@(() => Guardar())" IconCssClass="bi bi-plus-circle-dotted" />
+            <DxButton Text="Cancelar" RenderStyle="ButtonRenderStyle.Secondary" Click="Cerrar" CssClass="me-2" />
+
+        </div>
+    </FooterTextTemplate>
+</DxWindow>
