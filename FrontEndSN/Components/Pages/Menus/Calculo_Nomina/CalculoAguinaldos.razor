@@ -24,87 +24,96 @@
     }
     else
     {
+
         <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
-            <div class="card-body" style="display: flex; flex-direction: row; justify-content:space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div class="card-body">
 
-                <div style="display:flex; justify-content:space-between; align-items:center;width:100%;">
-                    <div style="width: 350px; padding:5px;">
-
-                        <label class="form-label">Registro patronal:</label>
+                <DxFormLayout>
+                    <!-- ================= RENGLÓN 1: Combos ================= -->
+                    <!-- Registro Patronal (5 columnas) -->
+                    <DxFormLayoutItem Caption="Registro patronal:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="5">
                         <DxComboBox Data="@ListaPatrones" ValueFieldName="id" TextFieldName="razon_social"
                                     Value="@IdPatronSeleccionado"
                                     SearchMode="ListSearchMode.AutoSearch"
                                     NullText="Seleccione un registro patronal"
                                     ShowDropDownButton="false"
                                     ValueChanged="(int newValue) => OnRegistroPatronalChanged(newValue)">
-
                             <Buttons>
-                                <!-- Esto mueve el botón por defecto hacia la izquierda -->
                                 <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
                             </Buttons>
-
                         </DxComboBox>
-                    </div>
+                    </DxFormLayoutItem>
 
-                    <div style="width: 250px; padding:5px;">
-                        <label class="form-label">Nómina:</label>
-
+                    <!-- Nómina (3 columnas) -->
+                    <DxFormLayoutItem Caption="Nómina:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="3">
                         <DxComboBox Data="@ListaNominas" ValueFieldName="Id" TextFieldName="DescripcionCompleta"
                                     Value="@IdNominaSeleccionada"
                                     ShowDropDownButton="false"
                                     NullText="Seleccione una nómina"
-                                    ValueChanged="(int newValue)=>OnNominaChanged(newValue)">
-
+                                    ValueChanged="(int newValue) => OnNominaChanged(newValue)">
                             <Buttons>
                                 <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
                             </Buttons>
-
                         </DxComboBox>
-                    </div>
+                    </DxFormLayoutItem>
 
-                    <div style="width: 250px; padding:5px;">
-                        <label class="form-label">Centro de Ctos.:</label>
-
+                    <!-- Centro de Costos (4 columnas) -->
+                    <DxFormLayoutItem Caption="Centro de Ctos.:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
                         <DxComboBox Data="@ListaCentros" ValueFieldName="Id" TextFieldName="NombreCompleto"
                                     Value="@IdCentroDeCostosSeleccionado"
                                     ShowDropDownButton="false"
-                                    ValueChanged="(int newValue)=>OnCentroCostosChanged(newValue)">
-
+                                    ValueChanged="(int newValue) => OnCentroCostosChanged(newValue)">
                             <Buttons>
                                 <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
                             </Buttons>
-
                         </DxComboBox>
-                    </div>
-                </div>
+                    </DxFormLayoutItem>
 
-                <div style="width:100%;display:flex;justify-content:center;align-content:center;gap:2rem;">
+                    <!-- ================= RENGLÓN 2: Checkboxes ================= -->
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <!-- Usamos el CSS puro que ya te funcionaba para forzar la línea horizontal -->
+                            <div style="width: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; flex-wrap: wrap; gap: 2rem; margin-top: 15px; margin-bottom: 5px;">
 
-                    <DxCheckBox @bind-Checked="@Considerar360Dias" @bind-Checked:after="LimpiarGrid">
-                        Considerar 360 días de cálculo
-                    </DxCheckBox>
+                                <DxCheckBox @bind-Checked="@Considerar360Dias" @bind-Checked:after="LimpiarGrid">
+                                    Considerar 360 días de cálculo
+                                </DxCheckBox>
 
-                    <DxCheckBox @bind-Checked="@TomarDiasSinCalcular" @bind-Checked:after="LimpiarGrid">
-                        Considerar días sin acumular como asistencia
-                    </DxCheckBox>
+                                <DxCheckBox @bind-Checked="@TomarDiasSinCalcular" @bind-Checked:after="LimpiarGrid">
+                                    Considerar días sin acumular como asistencia
+                                </DxCheckBox>
 
-                    <DxCheckBox @bind-Checked="@ConsiderarFaltas" @bind-Checked:after="LimpiarGrid">
-                        Considerar faltas en cálculo de días a pagar
-                    </DxCheckBox>
+                                <DxCheckBox @bind-Checked="@ConsiderarFaltas" @bind-Checked:after="LimpiarGrid">
+                                    Considerar faltas en cálculo de días a pagar
+                                </DxCheckBox>
 
-                </div>
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
 
-                <div style=" width:100%;display: flex; flex-direction: row;justify-content:end;align-items:center; gap: 0.5rem;padding-top:8px;padding-bottom:1px;padding-right:5px;">
-                    <DxButton Text="Generar Cálculo de Aguinaldo" Enabled="@(IdNominaSeleccionada > 0)" 
-                        IconCssClass="bi bi-search" RenderStyle="ButtonRenderStyle.Primary" Click="CargarDatosAguinaldo" />
-                    
-                    <DxButton Text="Exportar a Excel" Enabled="@(ListaAguinaldos?.Count > 0)" 
-                        IconCssClass="bi bi-file-earmark-bar-graph" RenderStyle="ButtonRenderStyle.Success" Click="DescargarExcel" />
+                    <!-- ================= RENGLÓN 3: Botones ================= -->
 
-                    <DxButton Text="Generar Incidencias" Enabled="@(IdNominaSeleccionada > 0 && ListaAguinaldos.Count > 0)"
-                              IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdNominaSeleccionada > 0 && ListaAguinaldos.Count>0?"btn-purple":"")"
-                              Click="MostrarModal" />
-                </div>
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 10px;">
+
+                                <DxButton Text="Generar Cálculo de Aguinaldo" Enabled="@(IdNominaSeleccionada > 0)"
+                                          IconCssClass="bi bi-search" RenderStyle="ButtonRenderStyle.Primary"
+                                          Click="CargarDatosAguinaldo" />
+
+                                <DxButton Text="Exportar a Excel" Enabled="@(ListaAguinaldos?.Count > 0)"
+                                          IconCssClass="bi bi-file-earmark-bar-graph" RenderStyle="ButtonRenderStyle.Success"
+                                          Click="DescargarExcel" />
+
+                                <DxButton Text="Generar Incidencias" Enabled="@(IdNominaSeleccionada > 0 && ListaAguinaldos?.Count > 0)"
+                                          IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdNominaSeleccionada > 0 && ListaAguinaldos?.Count > 0 ? "btn-purple" : "")"
+                                          Click="MostrarModal" />
+
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
 
             </div>
         </div>

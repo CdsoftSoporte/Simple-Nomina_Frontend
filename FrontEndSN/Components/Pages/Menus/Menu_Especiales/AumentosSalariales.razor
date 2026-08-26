@@ -1,10 +1,231 @@
 ﻿@attribute [Authorize]
 @page "/calculo_aumentos_salariales"
 @using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
 @inherits VentanaBase;
+
 <PageTitle>Cálculo de Aumentos Salariales</PageTitle>
-<h3>AumentosSalariales</h3>
 
-@code {
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Cálculo de aumentos salariales"
+                       Subtitulo="Generar modificaciones de salario masivas"
+                       RutaRegresar="/menu_especiales"
+                       Cargando="cargando" /> 
 
-}
+     @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body">
+
+                <DxFormLayout>
+                    <!-- ================= RENGLÓN 1 ================= -->
+                    <!-- Registro patronal (6 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Registro patronal:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">
+                        <DxComboBox Data="@ListaPatrones" ValueFieldName="id" TextFieldName="razon_social"
+                                    Value="@IdPatronSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    NullText="Seleccione un registro patronal"
+                                    ValueChanged="(int newValue) => OnRegistroPatronalChanged(newValue)"
+                                    ShowDropDownButton="false">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- NOMINA (6 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Nómina:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">
+                        <DxComboBox Data="@ListaNominas" ValueFieldName="Id" TextFieldName="DescripcionCompleta"
+                                    Value="@IdNominaSeleccionada"
+                                    ShowDropDownButton="false"
+                                    NullText="Seleccione una nómina"
+                                    ValueChanged="(int newValue) => OnNominaChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+                    
+                    <!-- ================= RENGLÓN 2 ================= -->
+                    <!-- Centro de Costos (4 columnas) -->
+                    <DxFormLayoutItem Caption="Centro de Ctos.:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                        <DxComboBox Data="@ListaCentros" ValueFieldName="Id" TextFieldName="NombreCompleto"
+                                    Value="@IdCentroDeCostosSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(int newValue) => OnCentroCostosChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+
+
+                    <!-- Departamento (4 columnas) -->
+                    <DxFormLayoutItem Caption="Departamento:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                        <DxComboBox Data="@ListaDepartamentos" ValueFieldName="Id" TextFieldName="Nombre"
+                                    Value="@IdDepartamentoSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(int newValue) => OnDepartamentoChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- Puesto (4 columnas) -->
+                    <DxFormLayoutItem Caption="Puesto:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                        <DxComboBox Data="@ListaPuestos" ValueFieldName="Id" TextFieldName="Nombre"
+                                    Value="@IdPuestoSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(int newValue) => OnPuestoChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- ================= RENGLÓN 3: Entradas de datos ================= -->
+                    <!-- Rango minimo (3 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Rango Mínimo de Sueldo (diario):" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
+                        <DxMaskedInput T="decimal"
+                                       @bind-Value="@RangoMinimo"
+                                       Mask="C2">
+                        </DxMaskedInput>
+                    </DxFormLayoutItem>
+
+                    <!-- Rango maximo (3 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Rango Máximo de Sueldo (diario):" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
+                        <DxMaskedInput T="decimal"
+                                       @bind-Value="@RangoMaximo"
+                                       Mask="C2">
+                        </DxMaskedInput>
+                    </DxFormLayoutItem>
+
+                    <!-- Tipo de Aumento (3 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Tipo de Aumento:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
+                        <DxComboBox Data="@ListaTiposAumento" ValueFieldName="Valor" TextFieldName="Texto"
+                                    Value="@TipoAumentoSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(char newValue) => OnTipoAumentoChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- Importe descuento (3 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Importe:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
+                        <DxMaskedInput T="decimal"
+                                       @bind-Value="@ImporteAumento"
+                                       Mask="@ValorMascara"
+                                       @key="@ValorMascara">
+                        </DxMaskedInput>
+                    </DxFormLayoutItem>
+
+                    <!-- ================= RENGLÓN 4: Botones de Acción ================= -->
+                    <!-- Contenedor de botones (12 columnas para empujar a la derecha) -->
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 10px;">
+
+
+                                
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        </div>
+
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body" style="justify-content:center;">
+                <div style="padding-left:12px;padding-top:5px;">
+                    <br />
+                    <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+
+                        <div style="display:flex;flex-direction:row;justify-content:space-between">
+                            <div class="card-body" style="display: flex; flex-direction: row; justify-content:start; align-items:center;">
+
+                                <div style="width:150px;">
+                                <DxDateEdit @bind-Date="FechaDeAplicacion"
+                                          
+                                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                </div>
+                                <DxButton style="text-decoration:underline;" Click="SeleccionarTodos" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Todos"></DxButton>
+                                <DxButton style="text-decoration:underline;" Click="SeleccionarNinguno" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Ninguno"></DxButton>
+                                <p>
+                                    @(SeleccionadosPorAumentar?.Count ?? 0) seleccionado(s)
+                                </p>
+                            </div>
+
+                            <div style="display:flex;align-items:center; gap:10px;">
+
+                                <DxButton Text="Calcular" Enabled="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada > 0 && RangoMaximo > 0 && ImporteAumento > 0)"
+                                          IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada > 0 && RangoMaximo > 0 && ImporteAumento > 0 ? "btn-purple" : "")"
+                                          Click="CalcularAumentos" />
+
+                                <DxButton Text="Export. Excel"
+                                          IconCssClass="bi bi-file-earmark-bar-graph" Enabled="@(ListaRegistros.Count>0 && SeleccionadosPorAumentar?.Count>0 )" RenderStyle="ButtonRenderStyle.Success"
+                                          Click="DescargarExcel" />
+
+
+                                <DxButton Enabled="@(SeleccionadosPorAumentar?.Count > 0)"
+                                          Text="@($"Aplicar aumento ({SeleccionadosPorAumentar?.Count ?? 0})")" IconCssClass="bi bi-upload"
+                                          @onclick="AplicarAumentos" RenderStyle="ButtonRenderStyle.Primary" />
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                <DxGrid @ref="GridAumentos"
+                        Data="ListaRegistros"
+                        @bind-SelectedDataItems="SeleccionadosPorAumentar"
+                        ShowFooter="true"
+                        SelectionMode="GridSelectionMode.Multiple"
+                        AllowSelectRowByClick="false"
+                        PageSize="8"
+                        CssClass="shadow-sm border-0">
+
+                    <Columns>
+                        @* Columna de Checkbox *@
+                        <DxGridSelectionColumn Width="50px" />
+                        <DxGridDataColumn FieldName="NombreEmpleado" Caption="Empleado" TextAlignment="GridTextAlignment.Left" />
+                        <DxGridDataColumn FieldName="FechaUltimoMov" Caption="Fecha Mov." DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />
+                        <DxGridDataColumn FieldName="DiarioActual" Caption="Diario" Width="100px" DisplayFormat="C2"TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="IntegradoActual" Caption="Integrado" Width="100px" DisplayFormat="C2"TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="DiasVacaciones" Caption="Días Vacaciones" Width="100px" TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="DiasAguinaldo" Caption="Días Aguinaldo" Width="100px" TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="PorcentajePrima" Caption="% Prima Vac." Width="100px" DisplayFormat="P2"TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="FactorIntegracion" Caption="Factor Integ." Width="100px" DisplayFormat="N6" TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="NuevoDiario" Caption="Nuevo Diario" Width="100px" DisplayFormat="C2"TextAlignment="GridTextAlignment.Center"/>
+                        <DxGridDataColumn FieldName="NuevoIntegrado" Caption="Nuevo Integrado" Width="100px" DisplayFormat="C2"TextAlignment="GridTextAlignment.Center"/>
+                    </Columns>
+
+                    <EmptyDataAreaTemplate>
+                        <div class="empty-grid-container">
+                            <div class="empty-icon-wrapper">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+                            <h4>Sin registros. Modifique los filtros de búsqueda</h4>
+                        </div>
+                    </EmptyDataAreaTemplate>
+                </DxGrid>
+            </div>
+        </div>
+        </div>
+    
+    }
+</div>

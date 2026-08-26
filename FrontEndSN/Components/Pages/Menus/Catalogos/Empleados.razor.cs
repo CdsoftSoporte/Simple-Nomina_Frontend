@@ -85,7 +85,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				var contenido = new MultipartFormDataContent();
 
 				//  Agregar el Archivo
-				var streamContent = new StreamContent(archivo.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024)); // Límite 5MB
+				var streamContent = new StreamContent(archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)); // Límite 10MB
 				contenido.Add(streamContent, "archivo", archivo.Name);
 
 				//  Agregar los campos de texto
@@ -196,6 +196,10 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 						".jpg" => "image/jpeg",
 						".jpeg" => "image/jpeg",
 						".png" => "image/png",
+						".doc" => "application/msword",
+						".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+						".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+						".xls" => "application/vnd.ms-excel",
 						_ => "application/octet-stream"
 					};
 

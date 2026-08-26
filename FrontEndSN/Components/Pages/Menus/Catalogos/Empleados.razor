@@ -359,7 +359,7 @@
                                             <label class="form-label">Archivo (PDF, JPG, PNG):</label>
                                             <!-- Usamos InputFile nativo de Blazor porque es muy fácil de leer en memoria antes de mandarlo a la API -->
                                             <InputFile OnChange="@((e) => SubirArchivoExpediente(e))"
-                                                       accept=".png,.jpg,.jpeg,.pdf"
+                                                       accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xls,.xlsx"
                                                        class="form-control custom-input" />
                                         </div>
                                     </div>

@@ -23,6 +23,8 @@ namespace FrontEndSN.Clases
 		protected List<EjerciciosItem> ListaEjercicios {  get; set; }
 		protected List<RegistroPatronalItem> ListaPatrones {  get; set; }
 		protected List<CentrosDeCostosItem> ListaCentros { get; set; }
+		protected List<DepartamentoItem> ListaDepartamentos { get; set; }
+		protected List<PuestoItem> ListaPuestos { get; set; }
 
 
 		protected void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
@@ -50,6 +52,82 @@ namespace FrontEndSN.Clases
 				ListaEjercicios.Add(new EjerciciosItem { Ejercicio = i.ToString() });
 			}
 			
+		}
+
+		protected async Task CargarDepartamentosParaCombo(char TodosDepartamentos='N')
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/Departamentos/Listar");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<DepartamentoItem>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					ListaDepartamentos = resultado?.Data ?? new();
+					if (TodosDepartamentos == 'S')
+					{
+						ListaDepartamentos.Insert(0, new DepartamentoItem { Id = 0, Nombre="Todos Los Deptos." });
+					}
+
+				}
+				else
+				{
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
+			finally
+			{
+				StateHasChanged();
+			}
+		}
+
+		protected async Task CargarPuestosParaCombo(char TodosPuestos='N')
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/Puesto/Listar");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<PuestoItem>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					ListaPuestos = resultado?.Data ?? new();
+					if (TodosPuestos == 'S')
+					{
+						ListaPuestos.Insert(0, new PuestoItem { Id = 0, Nombre = "Todos Los Puestos" });
+					}
+
+				}
+				else
+				{
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
+			finally
+			{
+				StateHasChanged();
+			}
 		}
 
 		protected async Task CargarPatronesParaCombo()
