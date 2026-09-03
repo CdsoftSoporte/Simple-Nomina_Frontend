@@ -50,6 +50,7 @@ namespace FrontEndSN.Components.Pages
 			new Modulo { Titulo = "Cálculo", Descripcion = "Administración de nóminas, periodos, cálculo, monitoreo, etc.", Icono = "oi oi-calculator", Ruta = "/menu_calculo_nomina" },
 			new Modulo { Titulo = "Timbrado", Descripcion = "Timbrar periodos de nómina.", Icono = "oi oi-globe", Ruta = "/menu_timbrado" },
 			new Modulo { Titulo = "Especiales", Descripcion = "Acciones Misceláneas", Icono = "oi oi-star", Ruta = "/menu_especiales" },
+			new Modulo { Titulo = "Reportes", Descripcion = "Reportes, Kardex, etc.", Icono = "bi bi-file-earmark-text-fill", Ruta = "/menu_reportes" },
 			new Modulo { Titulo = "Configuración", Descripcion = "Ajustes de la empresa y usuario.", Icono = "oi oi-cog", Ruta = "/menu_configuracion" },
 			new Modulo { Titulo = "Selecciona Empresa", Descripcion = "Cambiar la empresa en la que se está trabajando.", Icono = "oi oi-hard-drive", Ruta = "/selecciona_empresa" },
 			new Modulo { Titulo = "Cerrar Sesión", Descripcion = "Salir de forma segura del sistema.", Icono = "oi oi-account-logout", Ruta = "/logout" }

@@ -1,0 +1,254 @@
+﻿@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(15px); /* Empieza un poco más abajo */
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0); /* Termina en su posición original */
+    }
+}
+
+/* Utilidad de cursor para la cabecera del empleado */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Tarjetas de Resumen Superior */
+.summary-card {
+    border-left: 4px solid transparent !important;
+    border-radius: 8px;
+}
+
+    .summary-card.card-green {
+        border-left-color: #198754 !important;
+    }
+
+    .summary-card.card-red {
+        border-left-color: #c50f1f !important;
+    }
+
+    .summary-card.card-blue {
+        border-left-color: #0d6efd !important;
+    }
+
+    .summary-card.card-yellow {
+        border-left-color: #FDC905 !important;
+    }
+
+/* Botón personalizado morado */
+::deep .btn-purple {
+    background-color: #9810FA !important;
+    color: white !important;
+}
+
+    ::deep .btn-purple:hover {
+        background-color: #8e44ad !important;
+    }
+
+/* Círculo del Avatar del Empleado */
+.avatar-circle {
+    width: 45px;
+    height: 45px;
+    background-color: #DBEAFE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cajas de Detalle (Percepciones y Deducciones) */
+.detail-box {
+    border-radius: 6px;
+    border: 1px solid transparent;
+    animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+
+.boton-agrega-concepto {
+    background-color: transparent;
+    color: #CA8A04;
+    text-align: center;
+    width: 100%;
+    font-size: 20px;
+    margin-top: 1rem;
+    border-color: transparent;
+    cursor: pointer;
+}
+
+.box-green {
+    background-color: #198754;
+    border-color: #B9F8CF;
+}
+
+.box-red {
+    background-color: #fff8f8;
+    border-color: #f5c6cb;
+}
+
+/* Caja de Total Final */
+.total-box {
+    border: 1px solid transparent;
+    animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.box-blue {
+    background-color: #f0f7ff;
+    border-color: #b8daff;
+    animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.texto-totales {
+    font-weight: 600;
+}
+
+.texto-titulos-resumen {
+    padding-left: 21%;
+    font-weight: 700;
+}
+
+.tarjeta-flotante {
+    background-color: var(--var-bg-primary);
+    border-radius: 8px;
+    /* Borde súper sutil para enmarcar el difuminado */
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    /* La magia de la sombra: X Y Blur Spread Color */
+    /* Sombra 1: más oscura y pegada / Sombra 2: más amplia y difuminada hacia abajo-derecha */
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.04), 8px 12px 28px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+    .tarjeta-flotante:hover {
+        box-shadow: 4px 8px 12px rgba(0, 0, 0, 0.05), 8px 16px 32px rgba(0, 0, 0, 0.1);
+    }
+
+.box-yellow {
+    background-color: #FEF9C3;
+    border-color: transparent;
+}
+
+/* Contenedor que se expande */
+.expandable-content {
+    display: grid;
+    grid-template-rows: 0fr; /* Cerrado por defecto */
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+    .expandable-content.is-expanded {
+        grid-template-rows: 1fr; /* Abre suavemente hasta su tamaño natural */
+    }
+
+/* El interior necesita min-height 0 para que el grid funcione */
+.expandable-inner {
+    min-height: 0;
+}
+
+
+.tabla-moderna-nomina {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+    .tabla-moderna-nomina .dxbs-grid-header-row th {
+        background-color: #f8fafc !important;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .tabla-moderna-nomina .dxbs-grid-table td {
+        vertical-align: middle;
+        padding-top: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tabla-moderna-nomina .dxbs-grid-footer {
+        background-color: #f8fafc !important;
+        border-top: 2px solid #e2e8f0;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(6) {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(7) {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(8) {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+    /* Quita el borde de la celda del detalle para que se vea como una sola pieza */
+    .tabla-moderna-nomina .dxbs-grid-detail-row > td {
+        padding: 0 !important;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+        .tabla-moderna-nomina .dxbs-grid-detail-row > td .p-4 {
+            margin-top: -5px; /* Ajuste sutil para integrar visualmente */
+            position: relative;
+            z-index: 1;
+        }
+
+/* Estilos para igualar los bordes limpios, fuentes y colores del pie de tabla de la imagen */
+.tabla-moderna-nomina {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+    .tabla-moderna-nomina .dxbs-grid-header-row th {
+        background-color: #f8fafc !important;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .tabla-moderna-nomina .dxbs-grid-table td {
+        vertical-align: middle;
+        padding-top: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tabla-moderna-nomina .dxbs-grid-footer {
+        background-color: #f8fafc !important;
+        border-top: 2px solid #e2e8f0;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+        /* Inyectar colores directamente a los totales del Footer */
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(6) {
+            color: #10b981;
+            font-weight: 600;
+        }
+        /* Total Percepciones */
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(7) {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        /* Total Deducciones */
+        .tabla-moderna-nomina .dxbs-grid-footer td:nth-child(8) {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+.tarjeta-apartada {
+    border: 1px solid #e2e8f0 !important; /* Borde muy sutil para definición */
+    height: 100%; /* Por si un lado tiene más conceptos que el otro, se alineen abajo */
+}

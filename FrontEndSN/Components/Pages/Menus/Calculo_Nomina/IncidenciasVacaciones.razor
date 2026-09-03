@@ -1,0 +1,114 @@
+﻿@attribute [Authorize]
+@page "/incidencias_vacaciones"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
+@using FrontEndSN.Components.Modales
+@inherits VentanaBase;
+<PageTitle>Captura de Incidencias de Vacaciones</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Captura de Vacaciones"
+                       Subtitulo="Generar Incidencias de Vacaciones y Prima Vacacional"
+                       RutaRegresar="/menu_calculo"
+                       Cargando="cargando" /> 
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+
+                    <!-- Fila 1: 4 columnas para Patrón, 8 para Empleado -->
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Patrón:">
+                        <DxComboBox Data="@ListaPatrones"
+                                    TextFieldName="razon_social"
+                                    ValueFieldName="id"
+                                    @bind-Value="@IdPatronSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    NullText="Seleccione un patrón..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="8" Caption="Empleado:">
+                        <DxComboBox Data="@ListaEmpleados"
+                                    TextFieldName="NombreCompleto"
+                                    ValueFieldName="Id"
+                                    @bind-Value="@IdEmpleadoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    NullText="Seleccione un empleado..." />
+                    </DxFormLayoutItem>
+
+                    <!-- Fila 2: 4 columnas para cada fecha (12 en total, se reparten perfecto) -->
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Fecha Inicio:">
+                        <DxDateEdit
+                                    @bind-Date="@ModeloCaptura.fecha_inicio"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Fecha Fin:">
+                        <DxDateEdit T="DateTime?"
+                                    @bind-Date="@ModeloCaptura.fecha_fin"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Fecha Reingreso:">
+                        <DxDateEdit T="DateTime?"
+                                    @bind-Date="@ModeloCaptura.fecha_reingreso"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <!-- Fila 3: 3 columnas para los números (cajas más compactas) -->
+                    <DxFormLayoutItem ColSpanMd="3" Caption="Días Vacaciones (Descontar):">
+                        <DxSpinEdit T="int"
+                                    @bind-Value="@ModeloCaptura.dias_a_disfrutar"
+                                    MinValue="0" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="3" Caption="Días Prima a Pagar:">
+                        <DxSpinEdit T="decimal?"
+                                    @bind-Value="@ModeloCaptura.dias_prima_a_pagar"
+                                    MinValue="0"
+                                    DisplayFormat="N2" />
+                    </DxFormLayoutItem>
+
+                    <!-- Fila 4: Notas a lo ancho de la pantalla -->
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Notas / Comentarios:">
+                        <DxMemo @bind-Text="@ModeloCaptura.notas" Rows="2" />
+                    </DxFormLayoutItem>
+
+                    <!-- Botones (8 columnas de 12) -->
+                    <DxFormLayoutItem ColSpanMd="12">
+
+                        <Template>
+                            <div style="width: 100%; display: flex; justify-content: flex-end;gap:0.7rem;">
+
+                                <DxButton Text="Hco. Solicitudes" Click="HistoricoSolicitudes"
+                                          IconCssClass="bi bi-clipboard-check-fill" Enabled="@(IdPatronSeleccionado > 0 && IdEmpleadoSeleccionado>0)"
+                                          RenderStyle="ButtonRenderStyle.Warning" />
+
+                                <DxButton Text="Generar Incidencia" Click="GuardarIncidencia"
+                                          IconCssClass="bi bi-check-circle-fill" Enabled="@(IdPatronSeleccionado > 0)"
+                                          RenderStyle="ButtonRenderStyle.Primary" />
+
+                            </div>
+                        </Template>
+
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        </div>
+    }
+</div>
+
+
+<HistoricoSolicitudesVacaciones @ref="ModalHistorico" />

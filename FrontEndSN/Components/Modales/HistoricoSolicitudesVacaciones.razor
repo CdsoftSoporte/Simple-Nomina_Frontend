@@ -1,0 +1,121 @@
+﻿@using FrontEndSN.Clases
+@inherits VentanaBase
+
+<DxWindow HeaderText="@($"{TituloModal}")"
+          @bind-Visible="@IsVisible"
+          Width="1000px"
+          ShowFooter="true"
+          CloseOnEscape="true"
+          ShowCloseButton="true"
+          
+          AllowResize="false">
+    <BodyTemplate>
+        
+        <DxGrid Data="@ListaRegistros"
+                ShowFilterRow="false"
+                ShowSearchBox="true"
+                SearchBoxNullText="Buscar en el historial..."
+                PageSize="5"
+                HighlightRowOnHover="true">
+            <Columns>
+                <DxGridDataColumn FieldName="FechaSolicitud" Caption="F. Solicitud" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />
+
+                
+                @*<DxGridDataColumn FieldName="FechaInicio" Caption="F. Inicio" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />*@
+                <DxGridDataColumn Context="InicioContext" FieldName="FechaInicio" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center">
+                    <HeaderCaptionTemplate>
+                        <span style="color:#198754 !important;">F. Inicio</span>
+                    </HeaderCaptionTemplate>
+                </DxGridDataColumn>
+
+
+                
+                @*<DxGridDataColumn FieldName="FechaFin" Caption="F. Fin" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />*@
+                <DxGridDataColumn Context="InicioContext" FieldName="FechaFin" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center">
+                    <HeaderCaptionTemplate>
+                        <span style="color:#ffc107 !important;">F. Fin</span>
+                    </HeaderCaptionTemplate>
+                </DxGridDataColumn>
+                
+                
+                @*<DxGridDataColumn FieldName="FechaReingreso" Caption="F. Reing" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />*@
+                <DxGridDataColumn Context="InicioContext" FieldName="FechaReingreso" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center">
+                    <HeaderCaptionTemplate>
+                        <span style="color:#dc3545 !important;">F. Reingreso</span>
+                    </HeaderCaptionTemplate>
+                </DxGridDataColumn>
+
+                
+                <DxGridDataColumn FieldName="DiasADisfrutar" Caption="Días" Width="80px" TextAlignment="GridTextAlignment.Center" />
+                
+                <DxGridDataColumn FieldName="DiasPrimaAPagar" Caption="Prima a Pagar" Width="120px" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate Context="cellContext">
+                        @{
+                            // 2. Usamos cellContext.DataItem en lugar de context.DataItem
+                            var registro = (RegistroHistoricoVacaciones)cellContext.DataItem;
+                            if (registro.DiasPrimaAPagar == 0)
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                            else
+                            {
+                                <span>@registro.DiasPrimaAPagar.ToString("n2")</span> 
+                            }
+                        }
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName="Estatus" Caption="Estatus" Width="140px" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate Context="cellContext">
+                        @{
+                            var registro = (RegistroHistoricoVacaciones)cellContext.DataItem;
+
+                            // Asignamos el color del texto (Bootstrap nativo)
+                            var colorClase = registro.Estatus switch
+                            {
+                                "Aut" => "combo-aut",
+                                "Rec" => "combo-rec",
+                                "Pen" => "combo-pen",
+                                _ => "text-secondary"
+                            };
+                        }
+
+                        <DxComboBox Data="@ListaOpcionesEstatus"
+                                    ValueFieldName="Valor"
+                                    TextFieldName="Texto"
+                                    Value="@registro.Estatus"
+                                    ValueChanged="@((string nuevoValor) => ConfirmarActualizar(registro, nuevoValor))"
+                                    CssClass="@colorClase"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Never" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName="Notas" Caption="Notas" TextAlignment="GridTextAlignment.Left" />
+
+                <DxGridDataColumn Caption="Imp. Solic." Width="70px" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate Context="cellContext">
+                        @{
+                            var registro = (RegistroHistoricoVacaciones)cellContext.DataItem;
+                        }
+                        <button class="btn btn-sm btn-outline-secondary border-0 click-pointer"
+                                title="Imprimir formato de solicitud"
+                                @onclick="@(() => GenerarFormato(registro))">
+                            <!-- Icono de documento de Bootstrap -->
+                            <i class="bi bi-file-earmark-bar-graph fs-5"></i>
+                        </button>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+            </Columns>
+
+            <EmptyDataAreaTemplate Context="emptyContext">
+                <div class="empty-grid-container" style="text-align: center; padding: 2rem;">
+                    <div class="empty-icon-wrapper" style="font-size: 3rem; color: #6c757d;">
+                        <i class="bi bi-calendar-x"></i>
+                    </div>
+                    <h4 class="text-muted mt-2">No hay historial de vacaciones</h4>
+                </div>
+            </EmptyDataAreaTemplate>
+        </DxGrid>
+    </BodyTemplate>
+</DxWindow>

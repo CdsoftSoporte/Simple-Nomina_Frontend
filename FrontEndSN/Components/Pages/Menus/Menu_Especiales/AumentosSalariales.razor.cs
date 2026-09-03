@@ -16,15 +16,15 @@ namespace FrontEndSN.Components.Pages.Menus.Menu_Especiales
 		private int IdDepartamentoSeleccionado = 0;
 		private int IdPuestoSeleccionado = 0;
 
-		private decimal RangoMinimo = 0;
-		private decimal RangoMaximo = 0;
-		private decimal ImporteAumento = 0;
+		private decimal RangoMinimo;
+		private decimal? RangoMaximo;
+		private decimal? ImporteAumento;
 
 		private DateOnly FechaDeAplicacion = DateOnly.FromDateTime(DateTime.Now);
 
 		private char TipoAumentoSeleccionado = 'P';
 
-		private string ValorMascara = "P2";
+		private string ValorMascara = "0.00 '%'";
 
 		private List<RegistrosAumento> ListaRegistros = new();
 
@@ -96,7 +96,7 @@ namespace FrontEndSN.Components.Pages.Menus.Menu_Especiales
 		protected async Task OnTipoAumentoChanged(char nuevoValorMov)
 		{
 			TipoAumentoSeleccionado = nuevoValorMov;
-			ValorMascara = (TipoAumentoSeleccionado == 'P' ? "P2" : "C2");
+			ValorMascara = (TipoAumentoSeleccionado == 'P' ? "0.00 '%'" : "C2");
 			ImporteAumento = 0;
 			await LimpiarGrid();
 		}
@@ -195,9 +195,9 @@ namespace FrontEndSN.Components.Pages.Menus.Menu_Especiales
 					id_departamento = IdDepartamentoSeleccionado,
 					id_puesto = IdPuestoSeleccionado,
 					rango_minimo = RangoMinimo,
-					rango_maximo = RangoMaximo,
+					rango_maximo = RangoMaximo ?? 0,
 					tipo_aumento = TipoAumentoSeleccionado,
-					importe_aumento = ImporteAumento,
+					importe_aumento = ImporteAumento??0,
 
 				};
 

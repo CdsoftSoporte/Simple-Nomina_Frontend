@@ -105,14 +105,19 @@
 
                     <!-- Rango maximo (3 columnas de 12) -->
                     <DxFormLayoutItem Caption="Rango Máximo de Sueldo (diario):" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
-                        <DxMaskedInput T="decimal"
-                                       @bind-Value="@RangoMaximo"
-                                       Mask="C2">
-                        </DxMaskedInput>
+
+                        <DxSpinEdit T="decimal?"
+                            @bind-Value="@RangoMaximo"
+                            DisplayFormat="C2"  
+                            NullText="Mayor a 0.00"
+                            ShowSpinButtons="false">
+                        </DxSpinEdit>
+
                     </DxFormLayoutItem>
 
                     <!-- Tipo de Aumento (3 columnas de 12) -->
                     <DxFormLayoutItem Caption="Tipo de Aumento:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
+                        
                         <DxComboBox Data="@ListaTiposAumento" ValueFieldName="Valor" TextFieldName="Texto"
                                     Value="@TipoAumentoSeleccionado"
                                     ShowDropDownButton="false"
@@ -121,28 +126,22 @@
                                 <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
                             </Buttons>
                         </DxComboBox>
+
                     </DxFormLayoutItem>
 
                     <!-- Importe descuento (3 columnas de 12) -->
                     <DxFormLayoutItem Caption="Importe:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="12" ColSpanMd="3">
-                        <DxMaskedInput T="decimal"
-                                       @bind-Value="@ImporteAumento"
-                                       Mask="@ValorMascara"
-                                       @key="@ValorMascara">
-                        </DxMaskedInput>
+
+                        <DxSpinEdit T="decimal?"
+                                    @bind-Value="@ImporteAumento"
+                                    DisplayFormat="@ValorMascara"
+                                    @key="@ValorMascara"
+                                    NullText="Mayor a 0.00"
+                                    ShowSpinButtons="false">
+                        </DxSpinEdit>
+
                     </DxFormLayoutItem>
 
-                    <!-- ================= RENGLÓN 4: Botones de Acción ================= -->
-                    <!-- Contenedor de botones (12 columnas para empujar a la derecha) -->
-                    <DxFormLayoutItem ColSpanMd="12">
-                        <Template>
-                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 10px;">
-
-
-                                
-                            </div>
-                        </Template>
-                    </DxFormLayoutItem>
                 </DxFormLayout>
             </div>
         </div>
@@ -157,19 +156,21 @@
                         <div style="display:flex;flex-direction:row;justify-content:space-between">
                             <div class="card-body" style="display: flex; flex-direction: row; justify-content:start; align-items:center;">
 
-                                <div style="width:150px;">
+                                <div style="width:140px;">
+                                Fecha de aplicación
                                 <DxDateEdit @bind-Date="FechaDeAplicacion"
                                           
                                             ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                                 </div>
-                                <DxButton style="text-decoration:underline;" Click="SeleccionarTodos" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Todos"></DxButton>
-                                <DxButton style="text-decoration:underline;" Click="SeleccionarNinguno" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Ninguno"></DxButton>
-                                <p>
+
+                                <DxButton style="text-decoration:underline;margin-top:8px;" Click="SeleccionarTodos" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Todos"></DxButton>
+                                <DxButton style="text-decoration:underline;margin-top:8px;" Click="SeleccionarNinguno" RenderStyle="ButtonRenderStyle.None" Text="Seleccionar Ninguno"></DxButton>
+                                <p style="margin-top:22px;">
                                     @(SeleccionadosPorAumentar?.Count ?? 0) seleccionado(s)
                                 </p>
                             </div>
 
-                            <div style="display:flex;align-items:center; gap:10px;">
+                            <div style="display:flex;align-items:center; gap:10px;margin-top:5px;">
 
                                 <DxButton Text="Calcular" Enabled="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada > 0 && RangoMaximo > 0 && ImporteAumento > 0)"
                                           IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada > 0 && RangoMaximo > 0 && ImporteAumento > 0 ? "btn-purple" : "")"

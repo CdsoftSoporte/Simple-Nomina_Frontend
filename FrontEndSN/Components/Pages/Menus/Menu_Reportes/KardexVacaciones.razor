@@ -1,0 +1,83 @@
+﻿@attribute [Authorize]
+@page "/kardex_vacaciones"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Reutilizables
+@inherits VentanaBase;
+
+<PageTitle>Cálculo de Aumentos Salariales</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Kardex de vacaciones"
+                       Subtitulo="Estado de cuenta de control de vacaciones por empleado"
+                       RutaRegresar="/menu_especiales"
+                       Cargando="cargando" /> 
+
+     @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body">
+
+                <DxFormLayout>
+                    <!-- ================= RENGLÓN 1 ================= -->
+                    <!-- Registro patronal (6 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Empleado:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                        <DxComboBox Data="@ListaEmpleados" ValueFieldName="Id" TextFieldName="NombreCompleto"
+                                    Value="@IdEmpleadoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    NullText="Seleccione un empleado"
+                                    ValueChanged="(int newValue) => OnEmpleadoChanged(newValue)"
+                                    ShowDropDownButton="false">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- Hasta (2 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Fecha de corte:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="4" ColSpanMd="2">
+                        <DxDateEdit @bind-Date="FechaCorte"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Tipo de reporte:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
+                        <DxComboBox Data="@TipoReporte" ValueFieldName="Valor" TextFieldName="Texto"
+                                    Value="@TipoReporteSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(char newValue) => OnTipoReporteChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <!-- Botones (8 columnas de 12) -->
+                    <DxFormLayoutItem ColSpanMd="4">
+
+                        <CaptionTemplate><span style="visibility: hidden;">Botones</span></CaptionTemplate>
+
+                        <Template>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem;">
+
+                                <DxButton Text="Generar Reporte" Enabled="@(IdEmpleadoSeleccionado > 0)"
+                                          IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdEmpleadoSeleccionado > 0 ? "btn-purple" : "")"
+                                          Click="GenerarReporte" />
+
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        </div>
+        
+    }
+</div>

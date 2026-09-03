@@ -322,3 +322,18 @@ h1:focus, h2:focus, h3:focus, div:focus {
     align-items: center !important;
     width: 100%;
 }
+
+.combo-aut input {
+    color: #198754 !important;
+    font-weight: bold !important;
+}
+
+.combo-rec input {
+    color: #dc3545 !important;
+    font-weight: bold !important;
+}
+
+.combo-pen input {
+    color: #ffc107 !important;
+    font-weight: bold !important;
+}
