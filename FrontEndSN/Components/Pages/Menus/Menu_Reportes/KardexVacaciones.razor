@@ -1,6 +1,7 @@
 ﻿@attribute [Authorize]
 @page "/kardex_vacaciones"
 @using FrontEndSN.Clases
+@using FrontEndSN.Components.Modales
 @using FrontEndSN.Components.Reutilizables
 @inherits VentanaBase;
 
@@ -29,8 +30,8 @@
 
                 <DxFormLayout>
                     <!-- ================= RENGLÓN 1 ================= -->
-                    <!-- Registro patronal (6 columnas de 12) -->
-                    <DxFormLayoutItem Caption="Empleado:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                    <!-- Empleado (3 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Empleado:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="3">
                         <DxComboBox Data="@ListaEmpleados" ValueFieldName="Id" TextFieldName="NombreCompleto"
                                     Value="@IdEmpleadoSeleccionado"
                                     SearchMode="ListSearchMode.AutoSearch"
@@ -43,41 +44,103 @@
                         </DxComboBox>
                     </DxFormLayoutItem>
 
-                    <!-- Hasta (2 columnas de 12) -->
-                    <DxFormLayoutItem Caption="Fecha de corte:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="4" ColSpanMd="2">
-                        <DxDateEdit @bind-Date="FechaCorte"
-                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Tipo de reporte:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
-                        <DxComboBox Data="@TipoReporte" ValueFieldName="Valor" TextFieldName="Texto"
-                                    Value="@TipoReporteSeleccionado"
-                                    ShowDropDownButton="false"
-                                    ValueChanged="(char newValue) => OnTipoReporteChanged(newValue)">
+                    <!-- Registro patronal (6 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Registro patronal:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+                        <DxComboBox Data="@ListaPatrones" ValueFieldName="id" TextFieldName="razon_social"
+                                    Value="@IdPatronSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    NullText="Seleccione un registro patronal"
+                                    ValueChanged="(int newValue) => OnRegistroPatronalChanged(newValue)"
+                                    ShowDropDownButton="false">
                             <Buttons>
                                 <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
                             </Buttons>
                         </DxComboBox>
                     </DxFormLayoutItem>
 
+                    <!-- Fecha de corte (2 columnas de 12) -->
+                    <DxFormLayoutItem Caption="Fecha de corte:" CaptionPosition="CaptionPosition.Vertical" ColSpanxs="4" ColSpanMd="2">
+                        <DxDateEdit @bind-Date="FechaCorte"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    
+
                     <!-- Botones (8 columnas de 12) -->
-                    <DxFormLayoutItem ColSpanMd="4">
+                    <DxFormLayoutItem ColSpanMd="3">
 
                         <CaptionTemplate><span style="visibility: hidden;">Botones</span></CaptionTemplate>
 
                         <Template>
-                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                            <div style="width: 100%; display: flex; justify-content:end;margin:5px;">
 
-                                <DxButton Text="Generar Reporte" Enabled="@(IdEmpleadoSeleccionado > 0)"
-                                          IconCssClass="bi bi-file-earmark-check-fill" CssClass="@(IdEmpleadoSeleccionado > 0 ? "btn-purple" : "")"
+                                <DxButton Text="Generar Reporte" Enabled="@(IdEmpleadoSeleccionado > 0 && IdPatronSeleccionado>0)"
+                                          IconCssClass="bi bi-clipboard-minus-fill" CssClass="@(IdEmpleadoSeleccionado > 0 && IdPatronSeleccionado>0 ? "btn-purple" : "")"
                                           Click="GenerarReporte" />
-
                             </div>
                         </Template>
                     </DxFormLayoutItem>
                 </DxFormLayout>
             </div>
         </div>
-        
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body" style="justify-content:flex-end !important;">
+                <div style="padding-left:12px;padding-top:5px;">
+                    <br />
+                    <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+
+                            <div>
+                                <p class="m-0" style="font-weight: 500;">
+                                    Fecha de Inicio de antigüedad: @FecInicioAntiguedad.ToString("dd-MM-yyyy")
+                                </p>
+                            </div>
+
+                            <div>
+                                <DxButton Text="Exportar Excel"
+                                          IconCssClass="bi bi-file-earmark-bar-graph"
+                                          Enabled="@(ListaRegistros.Count > 0)"
+                                          RenderStyle="ButtonRenderStyle.Success"
+                                          Click="ExportarExcel" />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    </div>
+
+
+                    <DxGrid 
+                            Data="@ListaRegistros"
+                            ShowFooter="true"
+                            PageSize="10"
+                            CustomizeElement="OnCustomizeElement"
+                            HighlightRowOnHover="true"
+                            CssClass="shadow-sm border-0">
+                        <Columns>
+                            <DxGridDataColumn FieldName="FechaMovimiento" Caption="Fecha Movimiento" DisplayFormat="dd/MM/yyyy" Width="100px" TextAlignment="GridTextAlignment.Left" />
+                            <DxGridDataColumn FieldName="Concepto" Caption="Tipo Movimiento" Width="207px" TextAlignment="GridTextAlignment.Left" />
+                            <DxGridDataColumn FieldName="DiasAbono" Caption="Días Ganados" Width="130px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="DiasCargo" Caption="Días Tomados" Width="130px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="SaldoDias" Caption="Saldo Días"   Width="130px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="PrimaAbono" Caption="Prima Ganada" DisplayFormat="C2" Width="140px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="PrimaCargo" Caption="Prima Pagada" DisplayFormat="C2" Width="140px" TextAlignment="GridTextAlignment.Center" />
+                            <DxGridDataColumn FieldName="SaldoPrima" Caption="Saldo Prima" DisplayFormat="C2" Width="140px" TextAlignment="GridTextAlignment.Center" />
+                            
+                        </Columns>
+
+                        <EmptyDataAreaTemplate>
+                            <div class="empty-grid-container">
+                                <div class="empty-icon-wrapper">
+                                    <i class="bi bi-calendar-x"></i>
+                                </div>
+                                <h4>Sin Movimientos Encontrados.</h4>
+                            </div>
+                        </EmptyDataAreaTemplate>
+                    </DxGrid>
+                </div>
+            </div>
+
     }
 </div>

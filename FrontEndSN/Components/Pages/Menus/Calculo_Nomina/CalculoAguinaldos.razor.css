@@ -16,15 +16,7 @@
 }
 
 
-/* Botón personalizado morado */
-::deep .btn-purple {
-    background-color: #9810FA !important;
-    color: white !important;
-}
 
-    ::deep .btn-purple:hover {
-        background-color: #8e44ad !important;
-    }
 
 
 /* Cajas de Detalle (Percepciones y Deducciones) */
