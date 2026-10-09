@@ -253,6 +253,9 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			[JsonPropertyName("visible_en_recibo")]
 			public char VisibleEnRecibo { get; set; }
 
+			[JsonPropertyName("acumula_para_ptu")]
+			public char AcumulaParaPtu { get; set; }
+
 			[JsonPropertyName("base_calculo")]
 			public int BaseCalculo { get; set; }
 
@@ -306,6 +309,14 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			{
 				get => CalculoAutomatico == 'S';
 				set => CalculoAutomatico = value ? 'S' : 'N';
+			}
+
+
+			[JsonIgnore]
+			public bool AcumulaParaPtuBool
+		{
+				get => AcumulaParaPtu == 'S';
+				set => AcumulaParaPtu = value ? 'S' : 'N';
 			}
 	}
 

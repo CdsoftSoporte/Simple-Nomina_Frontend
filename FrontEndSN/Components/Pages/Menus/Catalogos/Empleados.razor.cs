@@ -28,6 +28,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 		private List<PuestoItem> PuestosList = new();
 		private List<PuestoItem> PuestosListAux = new();
 		private List<TurnoItem> TurnosList = new();
+		private List<GrupoPrestacionesItem>GruposList=new();
 		private List<CatalogoSatModel> TipoRegimenList = new();
 		private List<CatalogoSatModel> TipoContratoList = new();
 		private List<CatalogoSatModel> TipoJornadaList = new();
@@ -38,6 +39,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 			new { Valor = 'H', Texto = "Hombre" },
 			new { Valor = 'M', Texto = "Mujer"  }
 		};
+
+
 
 		private List<dynamic> estadoCivilOpciones = new()
 		{
@@ -316,6 +319,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				CargarPuestos(),
 				CargarTurnos(),
 				CargarCentrosDeCostosParaCombo(),
+				CargarGruposPrestaciones(),
 				CargarSat("api/CatalogosSat/TipoRegimen", r => TipoRegimenList = r),
 				CargarSat("api/CatalogosSat/TipoContrato", r => TipoContratoList = r),
 				CargarSat("api/CatalogosSat/TipoJornada", r => TipoJornadaList = r),
@@ -385,6 +389,28 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
 			}
 		}
+
+		private async Task CargarGruposPrestaciones()
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				var request = new HttpRequestMessage(HttpMethod.Get, "api/GruposPrestaciones/ListarSinDetalle");
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<GrupoPrestacionesItem>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					GruposList = resultado?.Data ?? new();
+				}
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message + " "+ex.InnerException);
+			}
+		}
+
 
 		private async Task CargarSat(string url, Action<List<CatalogoSatModel>> asignar)
 		{
@@ -495,7 +521,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					Nss = "",
 					Sexo = 'H',
 					FechaNacimientoDt = DateTime.Today.AddYears(-18),
-					FechaIngresoDt = DateTime.Today
+					FechaIngresoDt = DateTime.Today,
+					Sindicalizado='N'
 				};
 			}
 			else
@@ -507,7 +534,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					Id = item.Id,
 					Paterno = item.Paterno,
 					Materno = item.Materno,
-					Nombre = item.Nombre,
+					Nombre =  item.Nombre,
 					Rfc = item.Rfc,
 					Curp = item.Curp,
 					Nss = item.Nss,
@@ -515,6 +542,7 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					IdCentroCostos=item.IdCentroCostos,
 					IdPuesto = item.IdPuesto,
 					IdTurno = item.IdTurno,
+					IdGrupoPrestacion = item.IdGrupoPrestacion,
 					IdTipoRegimen = item.IdTipoRegimen,
 					IdTipoContrato = item.IdTipoContrato,
 					IdTipoJornada = item.IdTipoJornada,
@@ -532,7 +560,8 @@ namespace FrontEndSN.Components.Pages.Menus.Catalogos
 					NoCuenta = item.NoCuenta,
 					IdBanco = item.IdBanco,
 					Observaciones = item.Observaciones,
-					Expediente = Expediente
+					Expediente = Expediente,
+					Sindicalizado=item.Sindicalizado
 				};
 			}
 

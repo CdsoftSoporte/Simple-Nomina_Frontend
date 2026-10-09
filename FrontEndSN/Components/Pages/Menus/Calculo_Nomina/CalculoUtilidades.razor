@@ -1,0 +1,174 @@
+﻿@attribute [Authorize]
+@page "/calculo_utilidades"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Modales
+@using FrontEndSN.Components.Reutilizables
+@inherits VentanaBase;
+
+<PageTitle>Cálculo de Utilidades</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Cálculo de Utilidades"
+                       Subtitulo="Cálculo Masivo de Participación de los Trabajadores en las Utilidades"
+                       RutaRegresar="/menu_calculo_nomina"
+                       Cargando="cargando" /> 
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body p-4">
+
+                <DxFormLayout CssClass="w-100">
+
+                    @* 1. MONTO A REPARTIR *@
+                    <DxFormLayoutItem Caption="Cantidad a repartir:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="3" CaptionCssClass="fw-bold text-secondary">
+                        <DxMaskedInput T="decimal"
+                                       @bind-Value="@CantidadARepartir"
+                                       Mask="C2"
+                                       CssClass="fs-5 fw-bold text-primary" />
+                    </DxFormLayoutItem>
+
+                    @* 2. REGLA DEL TOPE *@
+                    <DxFormLayoutItem Caption="Tope de utilidades:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4" CaptionCssClass="fw-bold text-secondary">
+                        <DxComboBox Data="@OpcionesLimite"
+                                    ValueFieldName="Valor"
+                                    TextFieldName="Texto"
+                                    Value="@LimiteSeleccionado"
+                                    ShowDropDownButton="false"
+                                    ValueChanged="(char newValue) => OnLimiteChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    @* 3. CONTENIDO DINÁMICO (Aparece según el tope elegido) *@
+                    @if (LimiteSeleccionado == '3')
+                    {
+                        <DxFormLayoutItem Caption="Histórico (3 Años):" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="5" CaptionCssClass="fw-bold text-secondary">
+                            <div class="d-flex gap-2">
+                                <DxButton Text="Plantilla"
+                                          IconCssClass="bi bi-file-earmark-arrow-down"
+                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                          Click="DescargarPlantilla" />
+
+                                <div class="btn btn-info position-relative overflow-hidden text-white m-0 d-flex align-items-center gap-1">
+                                    <i class="bi bi-file-earmark-excel"></i>
+                                    <span>@(archivoCargado ? $"Cargado: {nombreArchivo}" : "Subir Excel")</span>
+
+                                    <InputFile OnChange="OnArchivoSeleccionado" accept=".xlsx, .xls"
+                                               class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                               style="cursor: pointer;" />
+                                </div>
+                            </div>
+                        </DxFormLayoutItem>
+                    }
+                    else if (LimiteSeleccionado == '2')
+                    {
+                        <DxFormLayoutItem Caption="Considerar salarios de:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="5" CaptionCssClass="fw-bold text-secondary">
+                            <DxComboBox Data="@OpcionesTopeMeses"
+                                        ValueFieldName="Valor"
+                                        TextFieldName="Texto"
+                                        Value="@TopeMesesSeleccionado"
+                                        ShowDropDownButton="false"
+                                        ValueChanged="(char newValue) => OnTopeMesesChanged(newValue)">
+                                <Buttons>
+                                    <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                                </Buttons>
+                            </DxComboBox>
+                        </DxFormLayoutItem>
+                    }
+                    else
+                    {
+                        <DxFormLayoutItem ColSpanMd="5">
+                            <Template><div style="visibility: hidden;">Espaciador</div></Template>
+                        </DxFormLayoutItem>
+                    }
+
+                    @* 4. PATRON, NOMINA Y PERIODO PARA APLICAR EL PAGO DE PTU *@
+
+                    <DxFormLayoutItem Caption="Reg. Pat. donde se aplicará el ingreso:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4" CaptionCssClass="fw-bold text-secondary">
+                        <DxComboBox Data="@ListaPatrones"
+                                    ValueFieldName="id"
+                                    TextFieldName="razon_social"
+                                    Value="@IdPatronSeleccionado"
+                                    ShowDropDownButton="false"
+                                    NullText="Seleccione un registro patronal..."
+                                    ValueChanged="(int newValue) => OnPatronChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Nomina donde se aplicará el ingreso:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4" CaptionCssClass="fw-bold text-secondary">
+                        <DxComboBox Data="@ListaNominas"
+                                    ValueFieldName="Id"
+                                    TextFieldName="DescripcionCompleta"
+                                    Value="@IdNominaSeleccionada"
+                                    ShowDropDownButton="false"
+                                    NullText="Seleccione una nómina..."
+                                    Enabled="@(IdPatronSeleccionado>0)"
+                                    ValueChanged="(int newValue) => OnNominaChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Periodo donde se aplicará el ingreso:" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4" CaptionCssClass="fw-bold text-secondary">
+                        <DxComboBox Data="@ListaPeriodos"
+                                    ValueFieldName="id"
+                                    TextFieldName="DescripcionCompleta"
+                                    Value="@IdPeriodoSeleccionado"
+                                    ShowDropDownButton="false"
+                                    NullText="Seleccione un periodo..."
+                                    Enabled="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada>0)"
+                                    ValueChanged="(int newValue) => OnPeriodoChanged(newValue)">
+                            <Buttons>
+                                <DxComboBoxDropDownButton Position="EditorButtonPosition.Left" />
+                            </Buttons>
+                        </DxComboBox>
+                    </DxFormLayoutItem>
+
+
+
+                    @* 4. SEPARADOR, CHECKBOX Y BOTÓN DE ACCIÓN *@
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <hr class="my-3 text-muted" />
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                <div>
+                                    <DxCheckBox @bind-Checked="@DescontarFaltas" CssClass="fw-bold text-secondary" style="font-size: 1.05rem;">
+                                        Descontar días sin goce de sueldo del cálculo
+                                    </DxCheckBox>
+                                </div>
+
+                                <div>
+                                    <DxButton Text="Generar Importes"
+                                              Click="GenerarImportes"
+                                              IconCssClass="bi bi-calculator"
+                                              Enabled="@(IdPatronSeleccionado > 0 && IdNominaSeleccionada>0 && IdPeriodoSeleccionado>0 && CantidadARepartir>0)"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Size="ButtonSize.Large" />
+                                </div>
+
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+            </div>
+        </div>
+    }
+</div>

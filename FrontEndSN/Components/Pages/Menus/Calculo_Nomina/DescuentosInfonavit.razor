@@ -1,0 +1,214 @@
+﻿@attribute [Authorize]
+@page "/descuentos_infonavit"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Modales
+@using FrontEndSN.Components.Reutilizables
+@inherits VentanaBase;
+
+<PageTitle>Cálculo de Aumentos Salariales</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Captura Descuentos de Infonavit"
+                       Subtitulo="Administrar Créditos Infonavit de empleados"
+                       RutaRegresar="/menu_calculo_nomina"
+                       Cargando="cargando" /> 
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical" >
+
+                    <!-- Fila 1: 4 columnas para Patrón, 8 para Empleado -->
+                    <DxFormLayoutItem ColSpanMd="6" Caption="Patrón:">
+                        <DxComboBox Data="@ListaPatrones"
+                                    TextFieldName="razon_social"
+                                    ValueFieldName="id"
+                                    Value="@IdPatronSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue)=> OnPatronChanged(newValue))"
+                                    NullText="Seleccione un patrón..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="6" Caption="Empleado:">
+                        <DxComboBox Data="@ListaEmpleados"
+                                    TextFieldName="NombreCompleto"
+                                    ValueFieldName="Id"
+                                    Value="@IdEmpleadoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue)=> OnEmpleadoChanged(newValue))"
+                                    NullText="Seleccione un empleado..." />
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+
+                
+
+
+            </div>
+
+
+        </div>
+
+        <br />
+
+        <div style="padding-left:12px;padding-top:5px;">
+            <br />
+            <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+
+                <div style="display:flex;align-items:center; width:20% !important;padding:5px !important">
+                  
+                    <DxButton Enabled="@(IdEmpleadoSeleccionado > 0 && IdPatronSeleccionado > 0)"
+                              Text="Nuevo Crédito" IconCssClass="bi bi-plus-circle-fill"
+                              @onclick="@(() => MostrarModal())" RenderStyle="ButtonRenderStyle.Primary" />                  
+                </div>
+
+                @* Grid Principal *@
+                <DxGrid Data="@ListaRegistros"
+                              
+                        SelectionMode="GridSelectionMode.Multiple"
+                        AllowSelectRowByClick="false"
+                        PageSize="7"
+                        HighlightRowOnHover="true"
+                        CssClass="tabla-moderna-nomina shadow-sm border-0">
+
+                    <Columns>
+
+                        <DxGridDataColumn FieldName="NumCuenta" Caption="Num. Cuenta" Width="110px" TextAlignment="GridTextAlignment.Left" />
+                        <DxGridDataColumn FieldName="Descripcion" Caption="Descripcion" TextAlignment="GridTextAlignment.Left" />
+                        <DxGridDataColumn FieldName="FechaInicio" Caption="Inicio Descuento" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />
+                        <DxGridDataColumn FieldName="FechaFin" Caption="Fin Descuento" DisplayFormat="dd/MM/yyyy" Width="110px" TextAlignment="GridTextAlignment.Center" />
+                       
+                        <DxGridDataColumn FieldName="TipoDescuento" Caption="Tipo Descuento" Width="120px" TextAlignment="GridTextAlignment.Center" />
+
+                        <DxGridDataColumn FieldName="Importe" Caption="Importe" Width="100px" DisplayFormat="C2" TextAlignment="GridTextAlignment.Center" />
+                        <DxGridDataColumn FieldName="AplicarSeguro" Caption="¿Aplicar Seguro Vivienda?" Width="110px" TextAlignment="GridTextAlignment.Center" />
+                        <DxGridDataColumn FieldName="Estatus" Caption="Estado" Width="80px" TextAlignment="GridTextAlignment.Center" />
+
+                        <DxGridDataColumn Caption="Acciones" Width="80px" TextAlignment="GridTextAlignment.Center">
+                            <CellDisplayTemplate>
+                                @{
+                                    var item = (CreditosInfonavit)context.DataItem;
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-outline-primary btn-sm border-0 btn-icon-custom" @onclick="() => MostrarModal(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+
+                    </Columns>
+
+                    <EmptyDataAreaTemplate>
+                        <div class="empty-grid-container">
+                            <div class="empty-icon-wrapper">
+                                <i class="bi bi-card-heading"></i>
+                            </div>
+                            <h4>Sin créditos INFONAVIT registrados.</h4>
+                        </div>
+                    </EmptyDataAreaTemplate>
+
+                </DxGrid>
+
+
+
+
+
+
+
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@* Modal para Agregar/Editar *@
+<DxWindow @bind-Visible="@isModalVisible"
+          HeaderText="@(editModel.Id == 0 ? "Nuevo Registro" : "Editar Crédito")"
+          Width="700px"
+          AllowResize="false"
+          ShowCloseButton="true"
+          CloseOnEscape="true"
+          HeaderCssClass="bg-primary text-white"
+          FooterText="* campos obligatorios">
+    <BodyTextTemplate Context="windowContext">
+        <div class="p-3">
+
+            <DxFormLayout CaptionPosition="CaptionPosition.Vertical" contextmenu="menucontext">
+
+                <DxFormLayoutItem Caption="Número de Crédito:*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxTextBox @bind-Text="@editModel.NumCuenta"
+                               NullText="Ingrese el número"
+                               CssClass="custom-input" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Estatus:*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxComboBox Data="@ListaEstatus" ValueFieldName="Valor" TextFieldName="Texto"
+                                @bind-Value="@editModel.Estatus"
+                                SearchMode="ListSearchMode.AutoSearch"
+                                NullText="Seleccione el estatus" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Inicio de aplicación:*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxDateEdit @bind-Date="@editModel.FechaInicio"
+                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Fin de aplicación:" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxDateEdit @bind-Date="@editModel.FechaFin"
+                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Tipo de Descuento:*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxComboBox Data="@ListaTiposDescuento" ValueFieldName="Valor" TextFieldName="Texto"
+                                @bind-Value="@editModel.TipoDescuento"
+                                SearchMode="ListSearchMode.AutoSearch"
+                                NullText="Seleccione el tipo" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Importe:*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxSpinEdit @bind-Value="@editModel.Importe"
+                                DisplayFormat="N2"
+                                MinValue="1M"
+                                CssClass="custom-input" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="¿Aplicar Seguro?*" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxComboBox Data="@ListaAplicarPagoSeguro" ValueFieldName="Valor" TextFieldName="Texto"
+                                @bind-Value="@editModel.AplicarSeguro"
+                                SearchMode="ListSearchMode.AutoSearch"
+                                NullText="Seleccione una opción" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Descripción:" ColSpanMd="6" CaptionCssClass="fw-bold">
+                    <DxTextBox @bind-Text="@editModel.Descripcion"
+                               NullText="Opcional"
+                               CssClass="custom-input" />
+                </DxFormLayoutItem>
+
+            </DxFormLayout>
+            <p>*campos obligatorios</p>
+            <hr class="mt-2 mb-3" />
+
+            <div class="d-flex justify-content-end gap-2">
+                <DxButton Text="Cancelar" Click="() => isModalVisible = false" RenderStyle="ButtonRenderStyle.Secondary" />
+                <DxButton Text="Guardar Cambios" Click="Guardar" RenderStyle="ButtonRenderStyle.Primary" />
+            </div>
+
+        </div>
+    </BodyTextTemplate>
+</DxWindow>

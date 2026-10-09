@@ -289,6 +289,20 @@
                                             TextFieldName="Descripcion" ValueFieldName="Id"
                                             SearchMode="@ListSearchMode.AutoSearch" />
                             </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Grupo de Prestaciones:</label>
+                                <DxComboBox Data="@GruposList" @bind-Value="@Modelo.IdGrupoPrestacion"
+                                            TextFieldName="descripcion" ValueFieldName="id"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Sindicalizado:</label>
+                                <DxComboBox Data="@SiNoOpciones" @bind-Value="@Modelo.Sindicalizado"
+                                            TextFieldName="Texto" ValueFieldName="Valor"
+                                            SearchMode="@ListSearchMode.AutoSearch" />
+                            </div>
                            
                             <div class="col-md-12">
                                 <label class="form-label fw-bold small">Observaciones:</label>

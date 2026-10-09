@@ -13,7 +13,11 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			new MenuOpcion { Titulo = "Cálculo", Descripcion = "Calcular y visualizar periodos de nómina.", Ruta = "/calculo_nomina", Icono = "bi bi-calculator-fill", Color = "#198754" },
 			new MenuOpcion { Titulo = "Periodos Manuales", Descripcion = "Captura y edita totalmente un periodo de nomina", Ruta = "/periodos_manuales", Icono = "bi bi-pencil-square", Color = "#fd7e14" },			
 			new MenuOpcion { Titulo = "Calculo de Aguinaldos", Descripcion = "Cálculo masivo de aguinaldos.", Ruta = "/calculo_aguinaldos", Icono = "bi bi-cash-stack", Color = "#20c997" },
-			new MenuOpcion { Titulo = "Incidencias Vacaciones", Descripcion = "Captura de vacaciones y prima vacacional.", Ruta = "/incidencias_vacaciones", Icono = "oi oi-sun", Color = "#0d6efd" },
+			
+			new MenuOpcion { Titulo = "Cálculo de Utilidades", Descripcion = "Cálculo masivo de utilidades.", Ruta = "/calculo_utilidades", Icono = "bi bi-pie-chart-fill", Color = "#0d6efd" },
+			new MenuOpcion { Titulo = "Incidencias Vacaciones", Descripcion = "Captura de vacaciones y prima vacacional.", Ruta = "/incidencias_vacaciones", Icono = "oi oi-sun", Color = "#6610f2" },
+			new MenuOpcion { Titulo = "Descuentos Infonavit", Descripcion = "Administrar Créditos Infonavit de empleados.", Ruta = "/descuentos_infonavit", Icono = "bi bi-house-gear-fill", Color = "#d63384" },
+			new MenuOpcion { Titulo = "Simulador I.S.R. / IMSS", Descripcion = "Simula cómo se llegaron a importes de I.S.R. e IMSS", Ruta = "/simulador_isr_imss", Icono = "bi bi-database-fill-gear", Color = "#198754" },
 
 		};
 	}

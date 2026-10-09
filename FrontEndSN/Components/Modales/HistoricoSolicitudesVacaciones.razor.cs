@@ -147,8 +147,10 @@ namespace FrontEndSN.Components.Modales
 				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
 
+
 				var parametros = new
 				{
+					id=registro.Id,
 					id_patron = IdPatron,
 					id_empleado = IdEmpleado,
 					fecha_corte=registro.FechaInicio,

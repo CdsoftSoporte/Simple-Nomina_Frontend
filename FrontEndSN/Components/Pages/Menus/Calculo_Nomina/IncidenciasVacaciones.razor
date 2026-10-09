@@ -9,7 +9,7 @@
 <div class="dashboard-container page-header-fade fade-in-all">
      <FlechaRegresoMenu Titulo="Captura de Vacaciones"
                        Subtitulo="Generar Incidencias de Vacaciones y Prima Vacacional"
-                       RutaRegresar="/menu_calculo"
+                       RutaRegresar="/menu_calculo_nomina"
                        Cargando="cargando" /> 
 
     @if (cargando)
@@ -68,18 +68,44 @@
                     </DxFormLayoutItem>
 
                     <!-- Fila 3: 3 columnas para los números (cajas más compactas) -->
-                    <DxFormLayoutItem ColSpanMd="3" Caption="Días Vacaciones (Descontar):">
+                    <DxFormLayoutItem ColSpanMd="2" Caption="Días Vacaciones (Descontar):">
                         <DxSpinEdit T="int"
                                     @bind-Value="@ModeloCaptura.dias_a_disfrutar"
                                     MinValue="0" />
                     </DxFormLayoutItem>
 
-                    <DxFormLayoutItem ColSpanMd="3" Caption="Días Prima a Pagar:">
+                    <DxFormLayoutItem ColSpanMd="2" Caption="Días Prima a Pagar:">
                         <DxSpinEdit T="decimal?"
                                     @bind-Value="@ModeloCaptura.dias_prima_a_pagar"
                                     MinValue="0"
                                     DisplayFormat="N2" />
                     </DxFormLayoutItem>
+
+                    <!-- Fila 3: 3 columnas para los números (cajas más compactas) -->
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Nomina a aplicar:">
+                        <DxComboBox Data="@ListaNominas"
+                                    TextFieldName="DescripcionCompleta"
+                                    ValueFieldName="Id"
+                                    Value="@IdNominaSeleccionada"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ValueChanged="(int newValue) => OnNominaChanged(newValue)"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    NullText="Seleccione una nómina..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Periodo a aplicar:">
+                 
+                        <DxComboBox Data="@ListaPeriodos"
+                                    TextFieldName="DescripcionCompleta"
+                                    ValueFieldName="id"
+                                    @bind-Value="@ModeloCaptura.id_periodo"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    Enabled="@(IdNominaSeleccionada>0)"
+                                    NullText="Seleccione un periodo..." />
+                    
+                    </DxFormLayoutItem>
+
 
                     <!-- Fila 4: Notas a lo ancho de la pantalla -->
                     <DxFormLayoutItem ColSpanMd="12" Caption="Notas / Comentarios:">
@@ -97,7 +123,7 @@
                                           RenderStyle="ButtonRenderStyle.Warning" />
 
                                 <DxButton Text="Generar Incidencia" Click="GuardarIncidencia"
-                                          IconCssClass="bi bi-check-circle-fill" Enabled="@(IdPatronSeleccionado > 0)"
+                                          IconCssClass="bi bi-check-circle-fill" Enabled="@(IdPatronSeleccionado > 0 && IdEmpleadoSeleccionado>0)"
                                           RenderStyle="ButtonRenderStyle.Primary" />
 
                             </div>

@@ -138,6 +138,8 @@
                             <div class="col-12 mt-4">
                                 <h6 class="text-muted border-bottom pb-2">Comportamiento del Concepto</h6>
                                 <div class="d-flex flex-wrap gap-4 mt-3">
+                                    <DxCheckBox @bind-Checked="Modelo.AcumulaParaPtu" ReadOnly="esEdicion">Acumula para Parto de Utilidades</DxCheckBox>
+                                    <DxCheckBox @bind-Checked="Modelo.AfectaNetoBool" ReadOnly="esEdicion">Afecta al Neto a Pagar</DxCheckBox>
                                     <DxCheckBox @bind-Checked="Modelo.AfectaNetoBool" ReadOnly="esEdicion">Afecta al Neto a Pagar</DxCheckBox>
                                     <DxCheckBox @bind-Checked="Modelo.IntegraSBCBool" ReadOnly="esEdicion">Integra SBC (IMSS)</DxCheckBox>
                                     <DxCheckBox @bind-Checked="Modelo.VisibleEnReciboBool" ReadOnly="esEdicion">Imprimir en Recibo</DxCheckBox>

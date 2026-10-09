@@ -1,0 +1,316 @@
+﻿@attribute [Authorize]
+@page "/simulador_isr_imss"
+@using FrontEndSN.Clases
+@using FrontEndSN.Components.Modales
+@using FrontEndSN.Components.Reutilizables
+@inherits VentanaBase;
+
+<PageTitle>Simulador de ISR/IMSS</PageTitle>
+
+<div class="dashboard-container page-header-fade fade-in-all">
+     <FlechaRegresoMenu Titulo="Simulador Cálculo I.S.R. / IMSS"
+                       Subtitulo="Simula cómo se llegaron a importes de I.S.R. e IMSS"
+                       RutaRegresar="/menu_calculo_nomina"
+                       Cargando="cargando" /> 
+
+    @if (cargando)
+    {
+        <div class="d-flex justify-content-center align-items-center p-5">
+            <div class="text-center">
+                <div class="spinner-custom mb-3"></div>
+                <p class="text-muted">Espere por favor...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- FILTROS DE BÚSQUEDA -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+            <div class="card-body">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Patrón:">
+                        <DxComboBox Data="@ListaPatrones"
+                                    TextFieldName="razon_social"
+                                    ValueFieldName="id"
+                                    Value="@IdPatronSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue) => OnPatronChanged(newValue))"
+                                    NullText="Seleccione un patrón..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Nomina:">
+                        <DxComboBox Data="@ListaNominas"
+                                    TextFieldName="DescripcionCompleta"
+                                    ValueFieldName="Id"
+                                    Value="@IdNominaSeleccionada"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue) => OnNominaChanged(newValue))"
+                                    NullText="Seleccione una nómina..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4" Caption="Periodo:">
+                        <DxComboBox Data="@ListaPeriodos"
+                                    TextFieldName="DescripcionCompleta"
+                                    ValueFieldName="id"
+                                    Value="@IdPeriodoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue) => OnPeriodoChanged(newValue))"
+                                    NullText="Seleccione un periodo..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="8" Caption="Empleado:">
+                        <DxComboBox Data="@ListaEmpleados"
+                                    TextFieldName="NombreCompleto"
+                                    ValueFieldName="Id"
+                                    Value="@IdEmpleadoSeleccionado"
+                                    SearchMode="ListSearchMode.AutoSearch"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    ValueChanged="@((int newValue) => OnEmpleadoChanged(newValue))"
+                                    NullText="Seleccione un empleado..." />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="4">
+                        <CaptionTemplate><span style="visibility: hidden;">Botones</span></CaptionTemplate>
+                        <Template>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <DxButton Text="Simular Cálculo en Periodo"
+                                          Enabled="@(IdPatronSeleccionado>0 && IdNominaSeleccionada>0 && IdPeriodoSeleccionado>0 && IdEmpleadoSeleccionado>0)"
+                                          IconCssClass="bi bi-file-earmark-check-fill"
+                                          Click="Simular" />
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS DE RESULTADOS -->
+        @if (datosSimulacion != null)
+        {
+            <DxTabs CssClass="custom-tabs mt-2 mb-4">
+
+                @* DESGLOSE DE INGRESOS *@
+                <DxTabPage TabIconCssClass="bi bi-wallet2" Text="Ingresos y Base">
+                    <div class="pt-3">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+                            <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                                <span>1. Desglose de Percepciones</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <DxGrid Data="@datosSimulacion.Ingresos" CssClass="border-0">
+                                    <Columns>
+                                        <DxGridDataColumn FieldName="ClaveConcepto" Caption="Clave" Width="80px" />
+                                        <DxGridDataColumn FieldName="Concepto" Caption="Concepto" />
+                                        <DxGridDataColumn FieldName="ImporteGravado" Caption="Gravado" DisplayFormat="C2" />
+                                        <DxGridDataColumn FieldName="ImporteExento" Caption="Exento" DisplayFormat="C2" />
+                                        <DxGridDataColumn FieldName="ImporteTotal" Caption="Total" DisplayFormat="C2" />
+                                    </Columns>
+
+                                    <EmptyDataAreaTemplate>
+                                        <div class="empty-grid-container">
+                                            <div class="empty-icon-wrapper">
+                                                <i class="bi bi-cash-coin"></i>
+                                            </div>
+                                            <h4>Sin información.</h4>
+                                        </div>
+                                    </EmptyDataAreaTemplate>
+                                </DxGrid>
+                            </div>
+                        </div>
+                    </div>
+                </DxTabPage>
+
+                @* DESGLOSE DE ISR *@
+                <DxTabPage TabIconCssClass="bi bi-coin" Text="Cálculo ISR">
+                    <div class="pt-3">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante" style="background-color: #1e1e1e;">
+
+                            <div class="card-header" style="border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+                                <h6 class="m-0 text-white fw-bold">2. Cálculo de ISR (Artículo 96)</h6>
+
+                            </div>
+
+                            <div class="card-body p-4">
+
+                                <table style="width: 100%; max-width: 650px; margin: 0 auto; color: #fff; font-size: 1.05rem; border-collapse: collapse;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ccc;">Base Gravada del Periodo:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">@datosSimulacion.Isr.BaseGravadaPeriodo.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ccc;">Base Elevada al Mes:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; color: #aaa;">@datosSimulacion.Isr.BaseMensualizada.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ff6b6b;">(-) Límite Inferior:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; color: #ff6b6b; font-weight: bold;">@datosSimulacion.Isr.LimiteInferior.ToString("C2")</td>
+                                        </tr>
+                                        <tr style="background-color: rgba(255,255,255,0.02);">
+                                            <td style="padding: 8px 10px; border-bottom: 1px solid #333; color: #0dcaf0; font-weight: bold;">(=) Excedente del Límite:</td>
+                                            <td style="padding: 8px 10px; border-bottom: 1px solid #333; text-align: right; color: #0dcaf0; font-weight: bold;">@datosSimulacion.Isr.ExcedenteLimite.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ccc;">(x) Porcentaje Aplicable:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">@datosSimulacion.Isr.PorcentajeAplicable.ToString("N2")%</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ccc;">(=) Impuesto Marginal:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">@datosSimulacion.Isr.ImpuestoMarginal.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #ffc107;">(+) Cuota Fija:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; color: #ffc107; font-weight: bold;">@datosSimulacion.Isr.CuotaFija.ToString("C2")</td>
+                                        </tr>
+                                        <tr style="background-color: rgba(255,255,255,0.02);">
+                                            <td style="padding: 8px 10px; border-bottom: 1px solid #333; font-weight: bold;">(=) ISR Bruto Del Periodo:</td>
+                                            <td style="padding: 8px 10px; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">@datosSimulacion.Isr.ISRBrutoMensual.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; color: #198754;">(-) Subsidio Del Periodo:</td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; color: #198754; font-weight: bold;">@datosSimulacion.Isr.SubsidioDelPeriodo.ToString("C2")</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 15px; background-color: rgba(25, 135, 84, 0.1); border-left: 4px solid #198754; color: #198754; font-weight: bold; font-size: 1.1rem;">
+                                                ISR NETO A RETENER:
+                                            </td>
+                                            <td style="padding: 12px 15px; background-color: rgba(25, 135, 84, 0.1); text-align: right; color: #fff; font-weight: bold; font-size: 1.35rem;">
+                                                @datosSimulacion.Isr.ISRNetoRetenidoPeriodo.ToString("C2")
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </DxTabPage>
+
+                @* DESGLOSE DE IMSS *@
+                <DxTabPage TabIconCssClass="bi bi-hospital-fill" Text="Cálculo IMSS">
+                    <div class="pt-3">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante" style="background-color: #1e1e1e;">
+
+                            <div class="card-header" style="border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+                                <h6 class="m-0 text-white fw-bold">3. Retención IMSS (Cuota Obrera)</h6>
+                                
+                            </div>
+
+                            <div class="card-body p-4">
+
+                                <table style="width: 100%; margin-bottom: 15px; text-align: center;">
+                                    <tr>
+                                        <td style="padding: 10px; background-color: rgba(255,255,255,0.05); border-radius: 8px 0 0 8px;">
+                                            <span style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 2px;">Salario Diario Integrado</span>
+                                            <span style="font-size: 1.15rem; color: #0dcaf0; font-weight: bold;">@datosSimulacion.Imss.SalarioDiarioIntegrado.ToString("C2")</span>
+                                        </td>
+                                        <td style="padding: 10px; background-color: rgba(255,255,255,0.07);">
+                                            <span style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 2px;">Días Cotizados</span>
+                                            <span style="font-size: 1.15rem; color: #fff; font-weight: bold;">@datosSimulacion.Imss.DiasCotizados</span>
+                                        </td>
+                                        <td style="padding: 10px; background-color: rgba(255,255,255,0.05); border-radius: 0 8px 8px 0;">
+                                            <span style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 2px;">Valor UMA</span>
+                                            <span style="font-size: 1.15rem; color: #fff; font-weight: bold;">@datosSimulacion.Imss.ValorUMA.ToString("C2")</span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <table style="width: 100%; color: #fff; font-size: 1rem; border-collapse: collapse;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333;">
+                                                Excedente 3 UMA<br />
+                                                <span style="font-size: 0.8rem; color: #aaa;">Base: @datosSimulacion.Imss.BaseExcedenteUMA.ToString("C2") (Tasa: @datosSimulacion.Imss.PctExcedente)</span>
+                                            </td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">
+                                                @datosSimulacion.Imss.RetencionExcedente.ToString("C2")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333;">
+                                                Gastos Médicos Pensionados<br />
+                                                <span style="font-size: 0.8rem; color: #aaa;">Tasa: @datosSimulacion.Imss.PctGastosMedicos</span>
+                                            </td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">
+                                                @datosSimulacion.Imss.RetencionGastosMedicos.ToString("C2")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333;">
+                                                Prestaciones en Dinero<br />
+                                                <span style="font-size: 0.8rem; color: #aaa;">Tasa: @datosSimulacion.Imss.PctPrestacionesDinero</span>
+                                            </td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">
+                                                @datosSimulacion.Imss.RetencionPrestacionesDinero.ToString("C2")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333;">
+                                                Invalidez y Vida<br />
+                                                <span style="font-size: 0.8rem; color: #aaa;">Tasa: @datosSimulacion.Imss.PctInvalidezVida</span>
+                                            </td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">
+                                                @datosSimulacion.Imss.RetencionInvalidezVida.ToString("C2")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333;">
+                                                Cesantía en Edad Avanzada y Vejez<br />
+                                                <span style="font-size: 0.8rem; color: #aaa;">Tasa: @datosSimulacion.Imss.PctCesantiaVejez</span>
+                                            </td>
+                                            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-weight: bold;">
+                                                @datosSimulacion.Imss.RetencionCesantiaVejez.ToString("C2")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 15px; background-color: rgba(13, 110, 253, 0.1); border-left: 4px solid #0d6efd; color: #0d6efd; font-weight: bold; font-size: 1.05rem; margin-top: 5px;">
+                                                TOTAL A RETENER IMSS:
+                                            </td>
+                                            <td style="padding: 12px 15px; background-color: rgba(13, 110, 253, 0.1); text-align: right; color: #0dcaf0; font-weight: bold; font-size: 1.25rem; margin-top: 5px;">
+                                                @datosSimulacion.Imss.TotalRetencionIMSS.ToString("C2")
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </DxTabPage>
+
+                @* DESGLOSE DE INFONAVIT *@
+                <DxTabPage TabIconCssClass="bi bi-house-fill" Text="Cálculo INFONAVIT">
+                    <div class="pt-3">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 tarjeta-flotante">
+                            
+                            <div class="card-body p-0">
+                                @if (datosSimulacion.Infonavit != null && datosSimulacion.Infonavit.Any())
+                                {
+                                    <DxGrid Data="@datosSimulacion.Infonavit" CssClass="border-0">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="ClaveConcepto" Caption="Clave" Width="100px" />
+                                            <DxGridDataColumn FieldName="Descripcion" Caption="Concepto" />
+                                            <DxGridDataColumn FieldName="ImporteDescontado" Caption="Retención" DisplayFormat="C2" />
+                                        </Columns>
+                                    </DxGrid>
+                                }
+                                else
+                                {
+                                    <div class="p-5 text-center text-muted">
+                                        <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                                        <p class="mt-3">El empleado no cuenta con créditos activos o retenciones de Infonavit en este periodo.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </DxTabPage>
+            </DxTabs>
+        }
+    }
+</div>

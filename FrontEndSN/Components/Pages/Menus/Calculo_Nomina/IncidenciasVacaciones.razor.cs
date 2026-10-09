@@ -9,9 +9,9 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 		private CapturaVacacionesRequest ModeloCaptura = new CapturaVacacionesRequest();
 
-		// Variables globales que asumo ya manejas en tu vista
 		private int IdEmpleadoSeleccionado;
 		private int IdPatronSeleccionado;
+		private int IdNominaSeleccionada;
 
 		private HistoricoSolicitudesVacaciones ModalHistorico { get; set; }
 
@@ -20,57 +20,52 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			cargando = true;
 			await Task.WhenAll(
 					CargarPatronesParaCombo(),
-					CargarEmpleadosParaCombos('N')
+					CargarEmpleadosParaCombos('N'),
+					CargarNominasParaCombo()
 						);
 
 			cargando = false;
 			StateHasChanged();
 		}
 
-
-
-		// tipoFecha: 1 = Inicio, 2 = Fin
-		private void AlCambiarFechas(DateTime? nuevaFecha, int tipoFecha)
+		private string ValidarDatos()
 		{
-			if (tipoFecha == 1) ModeloCaptura.fecha_inicio = nuevaFecha;
-			if (tipoFecha == 2) ModeloCaptura.fecha_fin = nuevaFecha;
-
-			CalcularSugerencias();
-		}
-
-
-
-
-		private void CalcularSugerencias()
-		{
-			if (ModeloCaptura.fecha_inicio.HasValue && ModeloCaptura.fecha_fin.HasValue)
+			if (!ModeloCaptura.fecha_inicio.HasValue || !ModeloCaptura.fecha_fin.HasValue || !ModeloCaptura.fecha_reingreso.HasValue)
 			{
-				if (ModeloCaptura.fecha_fin >= ModeloCaptura.fecha_inicio)
-				{
-					TimeSpan diferencia = ModeloCaptura.fecha_fin.Value - ModeloCaptura.fecha_inicio.Value;
-					int diasCalculados = diferencia.Days + 1;
-
-					// Sugerimos los días a disfrutar
-					ModeloCaptura.dias_a_disfrutar = diasCalculados;
-
-					// Sugerimos la misma cantidad para la prima vacacional (el usuario puede editarlo)
-					ModeloCaptura.dias_prima_a_pagar = diasCalculados;
-
-					// Magia UX: Sugerimos la fecha de reingreso sumando 1 día a la fecha final
-					ModeloCaptura.fecha_reingreso = ModeloCaptura.fecha_fin.Value.AddDays(1);
-				}
+				return "Capture las fechas de inicio, fin y reingreso.";
 			}
+
+			if (ModeloCaptura.dias_a_disfrutar <= 0) 
+			{
+				return "Capture los días de vacaciones a disfrutar";
+			}
+
+			if(ModeloCaptura.id_periodo == 0)
+			{
+				return "Capture un periodo de nómina para aplicar las vacaciones";
+			}
+
+
+
+			return "";
 		}
 
 		private async Task GuardarIncidencia()
 		{
 			try
 			{
-				if (!ModeloCaptura.fecha_inicio.HasValue || !ModeloCaptura.fecha_fin.HasValue || !ModeloCaptura.fecha_reingreso.HasValue)
+
+				string mensaje_error = ValidarDatos();
+
+				if (mensaje_error.Length > 0)
 				{
-					await JS.InvokeVoidAsync("notifier.error", "Por favor completa las fechas de inicio, fin y reingreso.");
+					await JS.InvokeVoidAsync("notifier.error", mensaje_error);
 					return;
 				}
+
+				cargando = true;
+				StateHasChanged();
+
 
 				ModeloCaptura.id_empleado = IdEmpleadoSeleccionado;
 				ModeloCaptura.id_patron = IdPatronSeleccionado;
@@ -84,8 +79,13 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 
 				if (response.IsSuccessStatusCode)
 				{
+					await Task.Delay(800);
+					cargando = false;
 					await JS.InvokeVoidAsync("notifier.success", "Incidencia registrada con éxito.");
 					ModeloCaptura = new CapturaVacacionesRequest(); // Limpia la forma
+					IdEmpleadoSeleccionado = 0;
+					IdPatronSeleccionado = 0;
+					IdNominaSeleccionada = 0;
 					StateHasChanged();
 				}
 				else
@@ -100,10 +100,26 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			}
 		}
 
+		protected async Task OnNominaChanged(int nuevoIdNomina)
+		{
+			IdNominaSeleccionada = nuevoIdNomina;
+			ModeloCaptura.id_periodo = 0;
+
+			if (IdNominaSeleccionada > 0)
+			{
+				// Cargar los periodos de la nómina seleccionada
+				await CargarPeriodosParaCombo(IdNominaSeleccionada);
+			}
+			else
+			{
+				ListaPeriodos.Clear();
+			}
+		}
 		private async Task HistoricoSolicitudes()
 		{
 
 			var NombreEmpleado = ListaEmpleados.FirstOrDefault(e => e.Id == IdEmpleadoSeleccionado).NombreCompleto;
+
 			ModalHistorico.Mostrar(NombreEmpleado, IdPatronSeleccionado, IdEmpleadoSeleccionado);
 		}
 
@@ -119,6 +135,7 @@ namespace FrontEndSN.Components.Pages.Menus.Calculo_Nomina
 			public int dias_a_disfrutar { get; set; }
 			public decimal? dias_prima_a_pagar { get; set; }
 			public string? notas { get; set; }
+			public int id_periodo { get; set; }
 		}
 
 

@@ -27,6 +27,11 @@ namespace FrontEndSN.Clases
 		protected List<PuestoItem> ListaPuestos { get; set; }
 
 
+		protected List<dynamic> SiNoOpciones = new()
+		{
+			new { Valor = 'S', Texto = "Sí" },
+			new { Valor = 'N', Texto = "No"  }
+		};
 		protected void Grid_CustomizeElement(GridCustomizeElementEventArgs e)
 		{
 			if (e.ElementType == GridElementType.SearchBoxContainer)
@@ -205,6 +210,42 @@ namespace FrontEndSN.Clases
 				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
 
 				var request = new HttpRequestMessage(HttpMethod.Get, "api/Nominas/Listar");
+
+				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+				var response = await Http.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					var resultado = await response.Content.ReadFromJsonAsync<RespuestaBase<List<NominaItem>>>(
+						new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+					ListaNominas = resultado?.Data ?? new();
+				}
+				else
+				{
+					var errorData = await response.Content.ReadFromJsonAsync<RespuestaError>();
+					await JS.InvokeVoidAsync("notifier.error", "No se pudo cargar la lista: " + (errorData?.Message ?? "Error inesperado"));
+				}
+
+			}
+			catch (Exception ex)
+			{
+				await JS.InvokeVoidAsync("notifier.error", "Ocurrió un error: " + ex.Message);
+			}
+			finally
+			{
+				StateHasChanged();
+			}
+		}
+
+		protected async Task CargarNominasParaCombo(int IdPatronSeleccionado)
+		{
+			try
+			{
+				var token = await JS.InvokeAsync<string>("localStorage.getItem", "Token");
+				if (string.IsNullOrEmpty(token)) { Nav.NavigateTo("/login"); return; }
+
+				var request = new HttpRequestMessage(HttpMethod.Get, $"api/Nominas/ListarPorPatron/{IdPatronSeleccionado}");
+
 				request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
 				var response = await Http.SendAsync(request);

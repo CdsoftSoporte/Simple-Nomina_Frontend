@@ -45,6 +45,11 @@ namespace FrontEndSN.Clases
 		[JsonPropertyName("id_turno")]
 		public int IdTurno { get; set; }
 
+
+		[Range(1, int.MaxValue, ErrorMessage = "Seleccione un grupo de prestaciones")]
+		[JsonPropertyName("id_grupo_prestacion")]
+		public int IdGrupoPrestacion { get; set; }
+
 		[JsonPropertyName("id_tipo_regimen")]
 		public int? IdTipoRegimen { get; set; }
 
@@ -53,6 +58,9 @@ namespace FrontEndSN.Clases
 
 		[JsonPropertyName("id_tipo_jornada")]
 		public int? IdTipoJornada { get; set; }
+
+		[JsonPropertyName("sindicalizado")]
+		public char Sindicalizado { get; set; }
 
 		public char Sexo { get; set; } = 'H';
 
